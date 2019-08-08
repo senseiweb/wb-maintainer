@@ -8,12 +8,14 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { HttpClientModule } from '@angular/common/http';
 import { defaultFuseConfig } from './config/fuse-config';
 import 'hammerjs';
+import 'breeze-client';
 import {
   FuseProgressBarModule,
   FuseSidebarModule,
   FuseNavigationModule
 } from '@fuse/components';
 import { TranslateModule } from '@ngx-translate/core';
+import { DataAccessModule } from './data-access/data-access.module';
 
 @NgModule({
   declarations: [],
@@ -23,6 +25,7 @@ import { TranslateModule } from '@ngx-translate/core';
     MatMomentDateModule,
     AppLayoutModule,
     SharedModule,
+    DataAccessModule,
     TranslateModule.forRoot(),
     FuseModule.forRoot(defaultFuseConfig),
     FuseProgressBarModule,
@@ -34,6 +37,7 @@ import { TranslateModule } from '@ngx-translate/core';
     BrowserAnimationsModule,
     HttpClientModule,
     AppLayoutModule,
+    DataAccessModule,
     SharedModule,
     // Material moment date module
     MatMomentDateModule,

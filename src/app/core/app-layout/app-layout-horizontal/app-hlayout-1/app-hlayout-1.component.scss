@@ -44,7 +44,7 @@ app-horizontal-layout-1 {
           -webkit-overflow-scrolling: touch;
 
           // Content component
-          content {
+          app-content-holder {
             &.inner-scroll {
               flex: 1 1 0%;
               min-height: 0;

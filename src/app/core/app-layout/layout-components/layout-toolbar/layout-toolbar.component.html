@@ -31,11 +31,15 @@
     <div class="" fxFlex="0 1 auto" fxLayout="row" fxLayoutAlign="start center">
       <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
         <div fxLayout="row" fxLayoutAlign="center center">
-          <img
+          <mat-icon class="avatar mr-0 mr-sm-16">account_circle</mat-icon>
+
+          <!-- <img
             class="avatar mr-0 mr-sm-16"
             src="assets/images/avatars/Velazquez.jpg"
-          />
-          <span class="username mr-12" fxHide fxShow.gt-sm>Charlie Adams</span>
+          /> -->
+          <span class="username mr-12" fxHide fxShow.gt-sm>
+            {{ userName }}</span
+          >
           <mat-icon class="s-16" fxHide.xs>keyboard_arrow_down</mat-icon>
         </div>
       </button>
@@ -71,16 +75,17 @@
         [matMenuTriggerFor]="languageMenu"
       >
         <div fxLayout="row" fxLayoutAlign="center center">
-          <!-- <img
+          <img
             class="flag mr-8"
-            [src]="'assets/icons/flags/' + selectedLanguage.flag + '.png'"
-          /> -->
-          <!-- <span class="iso text-uppercase">{{ selectedLanguage.id }}</span> -->
+            [src]="'assets/icons/flags/' + selectedLanguage?.flag + '.png'"
+          />
+          -->
+          <span class="iso text-uppercase">{{ selectedLanguage?.id }}</span>
         </div>
       </button>
 
       <mat-menu #languageMenu="matMenu" [overlapTrigger]="false">
-        <!-- <button
+        <button
           mat-menu-item
           *ngFor="let lang of languages"
           (click)="setLanguage(lang)"
@@ -88,11 +93,11 @@
           <span fxLayout="row" fxLayoutAlign="start center">
             <img
               class="flag mr-16"
-              [src]="'assets/icons/flags/' + lang.flag + '.png'"
+              [src]="'assets/icons/flags/' + lang?.flag + '.png'"
             />
-            <span class="iso">{{ lang.title }}</span>
+            <span class="iso">{{ lang?.title }}</span>
           </span>
-        </button> -->
+        </button>
 
         <button mat-menu-item [routerLink]="'/components/multi-language'">
           <div fxLayout="row" fxLayoutAlign="start center">

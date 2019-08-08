@@ -1,12 +1,13 @@
-export * from './data-models/sharepoint-entity';
-export * from './data-access/data-access.module';
+export * from './data-models';
+export * from './data-access';
+export * from './decorators';
 export * from './core.module';
 export * from './config/app-config';
 export * from './config/app-intializer.service';
-export * from './config/nav-config.service';
+export * from './config/nav-configuration';
 export {
-  SpEntityProp
-} from './decorators/sp-entity-annotation/sp-entity-prop.decorator';
+  BzEntityProp as SpEntityProp
+} from './decorators/bz-entity-annotation/bz-entity-prop.decorator';
 export {
-  SpEntity
-} from './decorators/sp-entity-annotation/sp-entity.decorator';
+  BzEntity as SpEntity
+} from './decorators/bz-entity-annotation/bz-entity.decorator';

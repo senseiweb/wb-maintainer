@@ -1,21 +1,100 @@
 import {
-  SpPropDecoratorKind,
+  BzPropDecoratorKind,
   ISpEntityPropNavDecorator,
-  ISpEntityPropDataDecorator,
-  SpEntityPropDecorator,
-  ISpEntityCustomValidator,
-  ExtractConfigParameters
+  IBzEntityPropDataDecorator,
+  BzEntityPropDecorator,
+  IBzEntityCustomValidator,
+  ExtractConfigParameters,
+  IBreezeScaffoldProto
 } from '@app_types/entity-extension';
 import { Validator, DataType } from 'breeze-client';
-import { SharepointEntity } from 'app/core/data-models/sharepoint-entity';
-import { SharepointMetadata } from 'app/core/data-models/sharepoint-metadata';
+import { BreezeEntity } from 'app/core/data-models';
+
+/**
+ * Method Decorator for capturing Breeze entity initializer and assigned it to the
+ * class prototype.
+ */
+export function BzEntityInitializer(proto, key, descritor) {
+  proto.bzEntityInit = descritor;
+}
+
+/**
+ * Decorator factory that takes are validatorc config param and returns a
+ * propert decorator.
+ * @param validatorConfig: expects the configuartion object from the decorated
+ * validator located on individual entities. See [[IBzCustomValidator]]
+ * @returns MethodDecorator
+ */
+export const BzCustomValidator = <T>(
+  validatorConfig: IBzEntityCustomValidator<T>
+) => {
+  return (
+    proto: IBreezeScaffoldProto | BreezeEntity,
+    key: string,
+    propDescript: PropertyDescriptor
+  ) => {
+    if (!Object.getOwnPropertyDescriptor(proto, 'propCollection')) {
+      Object.defineProperty(proto, 'propCollection', {
+        enumerable: false,
+        value: new BzPropCollection(),
+        writable: true,
+        configurable: true
+      });
+    }
+
+    validatorConfig.validator = propDescript.value;
+
+    /** Register validator with Breeze */
+    Validator.registerFactory(validatorConfig.validator as any, key);
+
+    /**
+     * Push all "property type" validators into the Map array for the
+     * the property, if this is the first validator for the property
+     * create a new entry.
+     * --else--
+     * assumed that if not a property custom validator, it must be
+     * an entity level validator, so push the validator into the
+     * entity level array of validators.
+     */
+    if (validatorConfig.validatorScope === 'property') {
+      const validatorListForProp = (proto as IBreezeScaffoldProto).propCollection.customBzValidators.propVal.get(
+        validatorConfig.targetedProperty
+      );
+
+      if (validatorListForProp) {
+        validatorListForProp.push(validatorConfig.validator);
+      } else {
+        (proto as IBreezeScaffoldProto).propCollection.customBzValidators.propVal.set(
+          validatorConfig.targetedProperty,
+          [validatorConfig.validator]
+        );
+      }
+    } else {
+      (proto as IBreezeScaffoldProto).propCollection.customBzValidators.entityVal.push(
+        validatorConfig
+      );
+    }
+  };
+};
+
+export class BzPropCollection {
+  props: BzEntityPropDecorator[] = [];
+  propNameDictionary: Map<string, { [index: string]: string }> = new Map();
+  customBzValidators: {
+    propVal: Map<string, Array<() => Validator>>;
+    entityVal: Array<IBzEntityCustomValidator<any>>;
+  } = {
+    propVal: new Map(),
+    entityVal: []
+  };
+}
 
 /**
  * Helper method that uses a property's type to translate into a standard Breeze
  * Datatype. Any unknown types will throw an error.
  */
 const translateDataType = (
-  _arg: ISpEntityPropDataDecorator,
+  _arg: IBzEntityPropDataDecorator,
   keyPropType: string
 ) => {
   if (!_arg.dataCfg.dataType && !_arg.dataCfg.complexTypeName) {
@@ -44,12 +123,12 @@ const translateDataType = (
  * on class members, an instance of this class will be created on the
  * classes prototype as "propCollection" [[IBreezeScaffoldProto]].
  */
-export class SpEntityPropDecorArgCollection {
-  props: SpEntityPropDecorator[] = [];
+export class BzEntityPropDecorArgCollection {
+  props: BzEntityPropDecorator[] = [];
   propNameDictionary: Map<string, { [index: string]: string }> = new Map();
   customBzValidators: {
     propVal: Map<string, Array<() => Validator>>;
-    entityVal: Array<ISpEntityCustomValidator<any>>;
+    entityVal: Array<IBzEntityCustomValidator<any>>;
   } = {
     propVal: new Map(),
     entityVal: []
@@ -61,11 +140,11 @@ export class SpEntityPropDecorArgCollection {
  * "data" or "nav", and filters the expected args ExtractConfigParameters minus the
  * the TPropType property.
  */
-export function SpEntityProp<TPropKind extends SpPropDecoratorKind>(
+export function BzEntityProp<TPropKind extends BzPropDecoratorKind>(
   type: TPropKind,
-  args: ExtractConfigParameters<SpEntityPropDecorator, TPropKind>
+  args?: ExtractConfigParameters<BzEntityPropDecorator, TPropKind>
 ) {
-  return <TClass extends SharepointEntity | SharepointMetadata>(
+  return <TClass extends BreezeEntity>(
     // proto: Pick<TClass, keyof TClass>,
     proto: any,
     key: string
@@ -80,17 +159,18 @@ export function SpEntityProp<TPropKind extends SpPropDecoratorKind>(
     if (!Object.getOwnPropertyDescriptor(proto, 'propCollection')) {
       Object.defineProperty(proto, 'propCollection', {
         enumerable: false,
-        value: new SpEntityPropDecorArgCollection(),
+        value: new BzEntityPropDecorArgCollection(),
         writable: true,
         configurable: true
       });
     }
 
     const propCollection = (proto as any).propCollection;
+    args = args || ({} as any);
 
     /** If a property is data property setup up the configuration appropriately  */
     if (type === 'data') {
-      const arg: ISpEntityPropDataDecorator = args as any;
+      const arg: IBzEntityPropDataDecorator = args as any;
       arg.dataCfg = arg.dataCfg || {};
       arg.dataCfg.name = key;
 
@@ -121,6 +201,11 @@ export function SpEntityProp<TPropKind extends SpPropDecoratorKind>(
 
       arg.navCfg.isScalar = !!(arg.navCfg && arg.navCfg.isScalar);
       arg.navCfg.name = key;
+
+      // normalizeRelativeName
+      arg.relativeEntity = (arg.relativeEntity.charAt(0).toUpperCase() +
+        arg.relativeEntity.slice(1)) as any;
+
       arg.navCfg.entityTypeName = arg.relativeEntity;
       arg.navCfg.associationName = arg.navCfg.isScalar
         ? `${arg.relativeEntity}_${proto.constructor.name}`
@@ -130,7 +215,7 @@ export function SpEntityProp<TPropKind extends SpPropDecoratorKind>(
         arg.navCfg.foreignKeyNames = arg.navCfg.foreignKeyNames || [key + 'Id'];
       }
     }
-    (args as any).propType = type;
+    (args as any).kind = type;
     propCollection.props.push(args as any);
   };
 }

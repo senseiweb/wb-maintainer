@@ -1,0 +1,165 @@
+<div
+  id="step-gen-asset"
+  [@animate]="{ value: '*', params: { y: '100%' } }"
+  fxLayout="row"
+  fxLayoutAlign="space-between stretch"
+  fxFlex="100"
+>
+  <div fxLayout="column" fxFlex="30">
+    <h2>Classification</h2>
+    <h3>Details</h3>
+    <form [formGroup]="genFormGroup">
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <mat-form-field appearance="outline" fxFlex>
+          <mat-label>Generation Title</mat-label>
+          <input name="title" maxlength="25" formControlName="title" matInput />
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <mat-form-field appearance="outline" fxFlex>
+          <mat-label>In Support Of</mat-label>
+          <mat-select formControlName="iso">
+            <mat-option [value]="">Select Supported Operation</mat-option>
+            <mat-option *ngFor="let iso of allIsos" [value]="iso">
+              {{ iso }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <mat-form-field appearance="outline" fxFlex>
+          <mat-label>Generation Status</mat-label>
+          <mat-icon matSuffix class="secondary-text">storage</mat-icon>
+          <mat-select formControlName="genStatus">
+            <mat-option *ngFor="let status of statusEnum" [value]="status">
+              {{ status }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <mat-form-field appearance="outline" fxFlex>
+          <mat-label># of Assets</mat-label>
+          <input
+            name="assignedAssetCount"
+            formControlName="assignedAssetCount"
+            type="number"
+            matInput
+            readonly
+          />
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <ejs-datetimepicker
+          fxFlex
+          floatLabelType="Auto"
+          [min]="minDate"
+          matInput
+          name="genStartDate"
+          formControlName="genStartDate"
+          placeholder="Planned Generation Start"
+        >
+        </ejs-datetimepicker>
+      </div>
+      <div
+        mat-dialog-actions
+        class="m-0 p-16"
+        fxLayout="row"
+        fxLayoutAlign="end center"
+      >
+        <button
+          *ngIf="formMode === 'edit'"
+          mat-stroked-button
+          color="warn"
+          class="mr-8"
+          (click)="deleteGeneration()"
+          aria-label="Delete"
+          matTooltip="Delete"
+        >
+          DELETE
+        </button>
+
+        <button
+          *ngIf="formMode !== 'edit'"
+          mat-stroked-button
+          color="accent"
+          class="save-button"
+          (click)="saveChanges()"
+          [disabled]="genFormGroup.invalid"
+          aria-label="SAVE"
+        >
+          ADD
+        </button>
+
+        <button
+          *ngIf="formMode === 'edit'"
+          mat-stroked-button
+          color="accent"
+          class="save-button"
+          (click)="saveChanges()"
+          [disabled]="genFormGroup.invalid"
+          aria-label="SAVE"
+        >
+          UPDATE
+        </button>
+      </div>
+    </form>
+  </div>
+  <div fxLayout="column" fxFlex="65">
+    <h2>Assets</h2>
+    <div fxLayout="row" fxLayoutAlign="space-around stretch">
+      <div class="example-container">
+        <h3>Available</h3>
+
+        <div
+          cdkDropList
+          fusePrefectScroll
+          #unassignedAssetList="cdkDropList"
+          [cdkDropListData]="unassignedAssets"
+          [cdkDropListDisabled]="genFormGroup.invalid"
+          cdkDropListSortingDisabled
+          [cdkDropListConnectedTo]="[assignedAssetList]"
+          class="example-list"
+          (cdkDropListDropped)="droppedOnAsset($event)"
+        >
+          <div
+            class="example-box"
+            *ngFor="let asset of unassignedAssets"
+            [cdkDragData]="asset"
+            cdkDrag
+          >
+            {{ asset.alias }}
+          </div>
+        </div>
+      </div>
+
+      <div class="example-container">
+        <h3>Assigned</h3>
+
+        <div
+          cdkDropList
+          fusePrefectScroll
+          #assignedAssetList="cdkDropList"
+          [cdkDropListDisabled]="genFormGroup.invalid"
+          [cdkDropListData]="assignedAssets"
+          [cdkDropListConnectedTo]="[unassignedAssetList]"
+          class="example-list"
+          (cdkDropListDropped)="dropOnGenAsset($event)"
+        >
+          <div
+            class="example-box"
+            [cdkDragData]="genAsset"
+            *ngFor="let genAsset of assignedAssets"
+            cdkDrag
+          >
+            Mx Position: {{ genAsset.mxPosition }} | {{ genAsset.asset.alias }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

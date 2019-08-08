@@ -19,7 +19,6 @@ import {
   FuseSearchBarModule
 } from '@fuse/components';
 import { NavbarComponent } from './layout-navbar/layout-navbar.component';
-import { GanttAllModule } from '@syncfusion/ej2-angular-gantt';
 
 @NgModule({
   declarations: [
@@ -38,8 +37,7 @@ import { GanttAllModule } from '@syncfusion/ej2-angular-gantt';
     SharedModule,
     FuseNavigationModule,
     FuseShortcutsModule,
-    FuseSearchBarModule,
-    GanttAllModule
+    FuseSearchBarModule
   ],
   exports: [
     ContentHolderComponent,

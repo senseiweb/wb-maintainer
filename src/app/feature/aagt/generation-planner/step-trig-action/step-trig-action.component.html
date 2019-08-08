@@ -1,0 +1,140 @@
+<div
+  id="step-trig-action"
+  [@animate]="{ value: '*', params: { y: '100%' } }"
+  fxLayout="row"
+  fxLayoutAlign="space-between stretch"
+  fxFlex="100"
+>
+  <div fxLayout="column" fxFlex="30">
+    <h2>Triggers</h2>
+    <h3>Details</h3>
+    <form [formGroup]="trigFormGroup">
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <mat-form-field appearance="float" [floatLabel]="'always'" fxFlex>
+          <mat-label>Generation Triggers</mat-label>
+          <mat-select formControlName="triggerSelection">
+            <mat-option *ngFor="let trigger of triggerList" [value]="trigger">
+              Trigger For: {{ trigger.milestone }}
+            </mat-option>
+            <mat-option [value]="'new'">Add New Trigger</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <mat-form-field appearance="outline" fxFlex>
+          <mat-label>Trigger Milestone</mat-label>
+          <input name="milestone" formControlName="milestone" matInput />
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <ejs-datetimepicker
+          fxFlex
+          floatLabelType="Auto"
+          [min]="minDate"
+          matInput
+          name="triggerStart"
+          formControlName="triggerStart"
+          placeholder="Trigger Start"
+        >
+        </ejs-datetimepicker>
+      </div>
+      <div
+        mat-dialog-actions
+        class="m-0 p-16"
+        fxLayout="row"
+        fxLayoutAlign="end center"
+      >
+        <button
+          *ngIf="!isNewForm"
+          mat-stroked-button
+          color="warn"
+          class="mr-8"
+          (click)="deleteGeneration()"
+          aria-label="Delete"
+          matTooltip="Delete"
+        >
+          DELETE
+        </button>
+
+        <button
+          *ngIf="!isNewForm"
+          mat-stroked-button
+          color="accent"
+          class="save-button"
+          (click)="addNewTrigger()"
+          [disabled]="trigFormGroup.invalid"
+          aria-label="SAVE"
+        >
+          ADD
+        </button>
+        <button
+          *ngIf="isNewForm"
+          mat-stroked-button
+          color="accent"
+          class="save-button"
+          (click)="addNewTrigger()"
+          [disabled]="trigFormGroup.invalid"
+          aria-label="SAVE"
+        >
+          ADD
+        </button>
+      </div>
+    </form>
+  </div>
+  <div fxLayout="column" fxFlex="65">
+    <h2>Action Items</h2>
+    <div fxLayout="row" fxLayoutAlign="space-around stretch">
+      <div class="example-container">
+        <h3>Available</h3>
+
+        <div
+          cdkDropList
+          [cdkDropListDisabled]="trigFormGroup.invalid"
+          fusePrefectScroll
+          #unassignedActionItemList="cdkDropList"
+          [cdkDropListData]="unassignedActions"
+          cdkDropListSortingDisabled
+          [cdkDropListConnectedTo]="[assignedTrigActionList]"
+          class="example-list"
+          (cdkDropListDropped)="droppedOnActionItem($event)"
+        >
+          <div
+            class="example-box"
+            *ngFor="let actionItem of unassignedActions"
+            [cdkDragData]="actionItem"
+            cdkDrag
+          >
+            {{ actionItem.action }}
+          </div>
+        </div>
+      </div>
+
+      <div class="example-container">
+        <h3>Assigned</h3>
+
+        <div
+          cdkDropList
+          [cdkDropListDisabled]="trigFormGroup.invalid"
+          fusePrefectScroll
+          #assignedTrigActionList="cdkDropList"
+          [cdkDropListData]="assignedTrigActions"
+          [cdkDropListConnectedTo]="[unassignedActionItemList]"
+          class="example-list"
+          (cdkDropListDropped)="droppedOnActionItem($event)"
+        >
+          <div
+            class="example-box"
+            [cdkDragData]="trigAction"
+            *ngFor="let trigAction of assignedTrigActions"
+            cdkDrag
+          >
+            Action Sequence: {{ trigAction.sequence }} | Tasks Run Time:
+            {{ trigAction.actionItem.duration }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

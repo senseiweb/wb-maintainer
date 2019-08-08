@@ -1,22 +1,32 @@
 import { NgModule } from '@angular/core';
 import {
   MatToolbarModule,
+  MatStepperModule,
   MatIconModule,
   MatButtonModule,
   MatListModule,
   MatTooltipModule,
-  MatTextareaAutosize,
+  MatTableModule,
+  MatSelectModule,
   MatInputModule,
   MatMenuModule,
-  MatSlideToggleModule
+  MatTabsModule,
+  MatSlideToggleModule,
+  MatPaginatorModule,
+  MatSortModule
 } from '@angular/material';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FuseSharedModule } from '@fuse/shared.module';
 import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
 
 @NgModule({
   declarations: [],
   imports: [
+    MatSortModule,
+    MatTabsModule,
     MatToolbarModule,
+    MatTableModule,
+    MatSelectModule,
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
@@ -26,10 +36,17 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
     MatListModule,
     MatTooltipModule,
     MatInputModule,
-    MatSlideToggleModule
+    MatStepperModule,
+    MatSlideToggleModule,
+    DragDropModule,
+    MatPaginatorModule
   ],
   exports: [
+    MatSortModule,
+    MatTabsModule,
     MatToolbarModule,
+    MatTableModule,
+    MatSelectModule,
     MatMenuModule,
     MatTooltipModule,
     MatIconModule,
@@ -39,7 +56,10 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
     FuseSharedModule,
     FuseWidgetModule,
     FuseSidebarModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatStepperModule,
+    DragDropModule,
+    MatPaginatorModule
   ],
   providers: []
 })

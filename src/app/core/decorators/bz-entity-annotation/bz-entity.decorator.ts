@@ -2,24 +2,25 @@ import { SharepointEntity } from 'app/core/data-models/sharepoint-entity';
 import { SharepointMetadata } from 'app/core/data-models/sharepoint-metadata';
 import { Instantiable } from '@app_types/helper';
 import {
-  ISpEntityDecArgs,
-  ISpBzEntityDecorateArgs
+  IBzEntityDecArgs,
+  IBzEntityDecorateArgs
 } from '@app_types/entity-extension';
-import { CustomNameConventionService } from 'app/core/data-access/breeze-name-dictionary.service';
+import { CustomNameConventionService } from 'app/core/data-access/breeze-providers/custom-name-convention.service';
 import { MetadataStore } from 'breeze-client';
 import { NewTypeForStore } from './entity-maker';
-import { MxmAppName, MxmAssignedModels } from 'app/core/data-access/data-utils';
+import { BreezeEntity } from 'app/core/data-models';
 
-export function SpEntity<
-  TClass extends Instantiable<SharepointEntity | SharepointMetadata>
->(forAppNamed: MxmAppName | 'Global', entityProps: ISpEntityDecArgs) {
+export function BzEntity<TClass extends Instantiable<BreezeEntity>>(
+  entityProps?: IBzEntityDecArgs
+) {
   return (constructor: TClass): void => {
+    entityProps = entityProps || {};
     // TODO: check constructor name after uglify
     entityProps.shortName = (constructor as any).ENTITY_SHORTNAME =
       entityProps.shortName || constructor.name;
 
-    class SpBzEntityDecorateArgs implements ISpBzEntityDecorateArgs {
-      entityProps = entityProps;
+    class SpBzEntityDecorateArgs implements IBzEntityDecorateArgs {
+      entityProps = entityProps || {};
 
       constructor() {}
 
@@ -34,7 +35,7 @@ export function SpEntity<
           nameDictionaryService,
           store
         );
-      }
+      };
     }
 
     if (!Object.getOwnPropertyDescriptor(constructor, 'spBzEntity')) {
@@ -44,14 +45,6 @@ export function SpEntity<
         writable: true,
         configurable: true
       });
-    }
-
-    if (constructor.name !== 'SpEntityBase') {
-      const modelCollection = MxmAssignedModels.has(forAppNamed)
-        ? MxmAssignedModels.get(forAppNamed)
-        : [];
-      modelCollection.push(constructor as any);
-      MxmAssignedModels.set(forAppNamed, modelCollection);
     }
   };
 }

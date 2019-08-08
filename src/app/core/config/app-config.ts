@@ -1,8 +1,10 @@
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseNavigation } from '@fuse/types';
+import { BehaviorSubject } from 'rxjs';
+import { ISPUserProfileProperties } from '@app_types/sharepoint-entities';
 
 export class SpConfig {
-  static cfgWebApplicationSite = 'http://localhost:4202';
+  static cfgWebApplicationSite = 'http://localhost:4200';
 
   /** Dynamically added by App initializer to determine the URL location */
   static cfgSharepointMainAppSite = '';
@@ -12,29 +14,23 @@ export class SpConfig {
   static cfgFuseNavService: FuseNavigationService;
   static spClientCtx: SP.ClientContext;
   static spWeb: SP.Web;
-  static cfgMy: {
-    id: string;
-    lastName: string;
-    firstName: string;
-    spAccountName: string;
-    profileProps: any;
+  static cfgMy: BehaviorSubject<{
+    profileProps: ISPUserProfileProperties;
     spGroups: Array<{ id: number; title: string }>;
-  } = {
-    id: 'Not Set',
-    lastName: 'Not Set',
-    firstName: 'Not Set',
-    spAccountName: 'Not Set',
+  }> = new BehaviorSubject({
     profileProps: {},
     spGroups: []
-  };
+  });
 
-  static basicNavStructure: FuseNavigation[] = [
-    {
-      id: 'global',
-      title: 'Global',
-      type: 'item',
-      icon: 'person',
-      url: '/home'
-    }
-  ];
+  static inSavingState: BehaviorSubject<boolean> = new BehaviorSubject(false);
+}
+/**
+ * Determines which applications are display in the nav
+ * pane. These are directly related to the respective
+ * groups in sharepoint. If the group name changes in
+ * sharepoint these should be also updated.
+ */
+export enum SpAccessGroups {
+  aagtViewer = 'wbmx_aagt_viewer',
+  aagtPlannner = 'wbmx_aagt_planner'
 }

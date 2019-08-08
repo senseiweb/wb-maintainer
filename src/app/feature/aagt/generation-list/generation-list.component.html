@@ -1,0 +1,155 @@
+<div id="generation" class="page-layout carded fullwidth inner-scroll">
+  <!-- TOP BACKGROUND -->
+  <div class="top-bg primary"></div>
+  <!-- / TOP BACKGROUND -->
+
+  <!-- CENTER -->
+  <div class="center">
+    <!-- HEADER -->
+    <div
+      class="header primary"
+      fxLayout="column"
+      fxLayoutAlign="center center"
+      fxLayout.gt-sm="row"
+      fxLayoutAlign.gt-sm="space-between center"
+    >
+      <!-- APP TITLE -->
+      <div
+        class="logo mb-24 mb-md-0"
+        fxLayout="row"
+        fxLayoutAlign="start center"
+      >
+        <mat-icon
+          class="logo-icon s-32 mr-16"
+          [@animate]="{
+            value: '*',
+            params: { delay: '50ms', scale: '0.2' }
+          }"
+        >
+          flight
+        </mat-icon>
+        <span
+          class="logo-text h1"
+          [@animate]="{
+            value: '*',
+            params: { delay: '100ms', x: '-25px' }
+          }"
+        >
+          Generation
+        </span>
+      </div>
+      <!-- / APP TITLE -->
+
+      <!-- SEARCH -->
+      <div class="search-wrapper mx-32 mx-md-0">
+        <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
+          <mat-icon>search</mat-icon>
+          <input #filter placeholder="Search for a geneartion" />
+        </div>
+      </div>
+      <!-- / SEARCH -->
+
+      <!-- ADD BUTTON -->
+      <button
+        mat-raised-button
+        [routerLink]="'../../genie/planner/new'"
+        class="add-product-button fuse-white mt-24 mt-md-0"
+      >
+        <span>PLAN GENERATION</span>
+      </button>
+      <!-- / ADD BUTTON -->
+    </div>
+    <!-- / HEADER -->
+
+    <!-- CONTENT CARD -->
+    <div class="content-card">
+      <mat-table
+        class="generation-table"
+        #table
+        [dataSource]="dataSource"
+        matSort
+        [@animateStagger]="{ value: '50' }"
+        fusePerfectScrollbar
+      >
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef mat-sort-header
+            >ID</mat-header-cell
+          >
+          <mat-cell *matCellDef="let gen">
+            {{ gen.id }}
+          </mat-cell>
+        </ng-container>
+
+        <!-- Title Column -->
+        <ng-container matColumnDef="title">
+          <mat-header-cell *matHeaderCellDef>Title</mat-header-cell>
+          <mat-cell *matCellDef="let gen">
+            {{ gen.title }}
+          </mat-cell>
+        </ng-container>
+
+        <!-- ISO Column -->
+        <ng-container matColumnDef="iso">
+          <mat-header-cell *matHeaderCellDef mat-sort-header
+            >In Support Of</mat-header-cell
+          >
+          <mat-cell *matCellDef="let gen">
+            {{ gen.iso }}
+          </mat-cell>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <mat-header-cell *matHeaderCellDef fxHide mat-sort-header fxShow.gt-md
+            >Status</mat-header-cell
+          >
+          <mat-cell *matCellDef="let gen" fxHide fxShow.gt-md>
+            {{ gen.genStatus }}
+          </mat-cell>
+        </ng-container>
+
+        <!-- Gen Start Column -->
+        <ng-container matColumnDef="genStart">
+          <mat-header-cell *matHeaderCellDef>Execution Start</mat-header-cell>
+          <mat-cell *matCellDef="let gen">
+            {{ gen.genStartDate | date: 'dd-MMM HHmm' }}
+          </mat-cell>
+        </ng-container>
+
+        <!-- Asset Count Column -->
+        <ng-container matColumnDef="assignedAssetCount">
+          <mat-header-cell fxHide fxShow.gt-sm *matHeaderCellDef
+            ># of Assets</mat-header-cell
+          >
+          <mat-cell *matCellDef="let gen">
+            {{ gen.assignedAssetCount }}
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></mat-header-row>
+
+        <mat-row
+          *matRowDef="let gen; columns: displayedColumns"
+          class="generation"
+          matRipple
+          [routerLink]="'./' + gen.id + '/'"
+        >
+        </mat-row>
+      </mat-table>
+
+      <mat-paginator
+        #paginator
+        [length]="dataSource.filteredGenerations.length"
+        [pageIndex]="0"
+        [pageSize]="10"
+        [pageSizeOptions]="[5, 10, 25, 100]"
+      >
+      </mat-paginator>
+    </div>
+    <!-- / CONTENT CARD -->
+  </div>
+  <!-- / CENTER -->
+</div>

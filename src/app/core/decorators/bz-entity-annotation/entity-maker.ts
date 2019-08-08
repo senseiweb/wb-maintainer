@@ -7,18 +7,20 @@ import {
   Validator,
   DataProperty
 } from 'breeze-client';
-import { ISpEntityType } from '@app_types/breeze-extension';
+import { IBzCustomEntityType } from '@app_types/breeze-extension';
 import {
-  ISpEntityDecArgs,
-  ISpEntityPropDataDecorator,
+  IBzEntityDecArgs,
+  IBzEntityPropDataDecorator,
   ISpEntityPropNavDecorator,
-  IBreezeScaffoldProto
+  IBreezeScaffoldProto,
+  IAppFormGroup
 } from '@app_types/entity-extension';
-import { CustomNameConventionService } from 'app/core/data-access/breeze-name-dictionary.service';
-import { SpEntityPropDecorArgCollection } from './sp-entity-prop.decorator';
-import { AbstractControl } from '@angular/forms';
+import { CustomNameConventionService } from 'app/core/data-access/breeze-providers/custom-name-convention.service';
+import { BzEntityPropDecorArgCollection } from './bz-entity-prop.decorator';
+import { AbstractControl, FormGroup, Validators } from '@angular/forms';
 import * as _m from 'moment';
 import { SharepointEntity } from 'app/core/data-models/sharepoint-entity';
+import { BreezeEntity } from 'app/core/data-models';
 
 /**
  * Wraps a typical Breeze validator into a Form Control validator.
@@ -54,7 +56,7 @@ export const bzEntityValidatorWrapper = (
   validator: Validator,
   neededProps: string[]
 ) => {
-  return (entity: SharepointEntity) => {
+  return (entity: BreezeEntity) => {
     return (c: AbstractControl): { [error: string]: any } => {
       validator.context = validator.context || {};
 
@@ -69,9 +71,9 @@ export const bzEntityValidatorWrapper = (
 };
 
 export class NewTypeForStore {
-  public typeDef: Partial<ISpEntityType> = {};
+  public typeDef: Partial<IBzCustomEntityType> = {};
   public newBzEntityType: EntityType | ComplexType;
-  private entityProps: ISpEntityDecArgs = {} as any;
+  private entityProps: IBzEntityDecArgs = {} as any;
   // tslint:disable-next-line: ban-types
   private etConstructor: Function;
   private initializer: { [index: string]: (entity: any) => void } = {};
@@ -115,7 +117,7 @@ export class NewTypeForStore {
     const ep = this.entityProps;
     this.typeDef.shortName = ep.shortName;
     this.typeDef.dataProperties = {};
-    this.typeDef.custom = {};
+    this.typeDef.custom = {} as any;
     this.typeDef.isComplexType = ep.isComplexType;
     if (!ep.isComplexType) {
       this.typeDef.navigationProperties = {};
@@ -124,11 +126,11 @@ export class NewTypeForStore {
     return this;
   }
 
-  private step2_FixUpProps(propColl?: SpEntityPropDecorArgCollection): this {
+  private step2_FixUpProps(propColl?: BzEntityPropDecorArgCollection): this {
     const decoratedProps = propColl || this.target.propCollection;
     decoratedProps.props
       .filter(dp => dp.kind === 'data')
-      .forEach((dp: ISpEntityPropDataDecorator) => {
+      .forEach((dp: IBzEntityPropDataDecorator) => {
         if (dp.dataCfg.complexTypeName) {
           let cplxName = dp.dataCfg.complexTypeName;
           const nsStart = cplxName.indexOf(':#');
@@ -231,15 +233,51 @@ export class NewTypeForStore {
   }
 
   private step7_CreateFormValidation(dataProps?: DataProperty[]): this {
+    const customEntityType = (this
+      .newBzEntityType as any) as IBzCustomEntityType;
+
     /**
      * setups the defaults container for the form validators and
      * sets a local variable to reference the validators.
      */
-    const formValidators = (((this
-      .newBzEntityType as any) as ISpEntityType).custom.formValidators = {
+    customEntityType.custom.formValidators = {
       entityVal: [],
       propVal: new Map()
-    });
+    };
+
+    // Shorten variable name, seperate from declation so typescript  understands the shape of the object.
+    const formValidators = customEntityType.custom.formValidators;
+
+    customEntityType.custom.setFormValidators = (
+      frmGroup: IAppFormGroup<any>,
+      targetEntity: BreezeEntity
+    ): void => {
+      const frmControlKeys = Object.keys(frmGroup.controls);
+
+      for (const cntrlKey of frmControlKeys) {
+        // This will overwrite any other validators, is this a problem?
+        const propValidators = formValidators.propVal.get(cntrlKey);
+
+        if (propValidators) {
+          frmGroup.controls[cntrlKey].setValidators(propValidators);
+
+          frmGroup.controls[cntrlKey].updateValueAndValidity({
+            onlySelf: true,
+            emitEvent: false
+          });
+        }
+      }
+
+      if (formValidators.entityVal.length && targetEntity) {
+        const entityLevelValidators = formValidators.entityVal.map(ev =>
+          ev(targetEntity)
+        );
+
+        frmGroup.setValidators(Validators.compose(entityLevelValidators));
+
+        frmGroup.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+      }
+    };
 
     /** Set a local variable for the entity's found collection */
     const customValidatorConfigs = this.target.propCollection

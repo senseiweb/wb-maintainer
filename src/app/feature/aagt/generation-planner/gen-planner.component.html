@@ -1,0 +1,26 @@
+<div class="page-layout carded fullwidth inner-scroll">
+  <div class="center">
+    <div class="content-card">
+      <div class="content p-24" fusePerfectScrollbar>
+        <mat-horizontal-stepper
+          [linear]="false"
+          (selectionChange)="onStepChange($event)"
+          #stepper
+        >
+          <mat-step [completed]="">
+            <ng-template matStepLabel>
+              <span> Generation Info & Assets</span>
+            </ng-template>
+            <app-plan-gen-asset></app-plan-gen-asset>
+          </mat-step>
+          <mat-step [completed]="">
+            <ng-template matStepLabel>
+              <span>Trigger Actions</span>
+            </ng-template>
+            <app-plan-trig-action></app-plan-trig-action>
+          </mat-step>
+        </mat-horizontal-stepper>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,20 +1,23 @@
-import { SpEntity } from '../decorators/sp-entity-annotation/sp-entity.decorator';
-import { SpEntityProp } from '../decorators/sp-entity-annotation/sp-entity-prop.decorator';
+import { BreezeEntity } from './breeze-entity';
+import { BzEntity } from '../decorators/bz-entity-annotation/bz-entity.decorator';
+import { BzEntityProp } from '../decorators/bz-entity-annotation/bz-entity-prop.decorator';
+import { ComplexType } from 'breeze-client';
 
-@SpEntity('Global', {
+// @ts-ignore
+@BzEntity({
   isComplexType: true,
-  namespace: 'SP.Data',
   shortName: '__metadata'
 })
 export class SharepointMetadata {
   readonly shortname = '__metadata';
+  readonly repoName = '';
 
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   id: string;
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   uri: string;
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   etag: string;
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   type: string;
 }

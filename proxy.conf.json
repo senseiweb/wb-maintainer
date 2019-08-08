@@ -1,0 +1,29 @@
+{
+    "/sites/*": {  
+        "target": "http://localhost:8080",  
+        "secure": false,  
+        "changeOrigin": true,  
+        "logLevel": "debug"
+    },
+    "/mx-maintainer/*": {  
+        "target": "http://localhost:8080",  
+        "secure": false,  
+        "changeOrigin": true,  
+        "logLevel": "debug"
+    },
+    "/_api/*": {  
+        "target": "http://localhost:8080",  
+        "secure": false,  
+        "changeOrigin": true,  
+        "logLevel": "debug",
+        "pathRewrite": {
+
+        }  
+    },
+    "/_vti_bin/*": {  
+        "target": "http://localhost:8080",  
+        "secure": false,  
+        "changeOrigin": true,  
+        "logLevel": "debug"
+    }    
+}

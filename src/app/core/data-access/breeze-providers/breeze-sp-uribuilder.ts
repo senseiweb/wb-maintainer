@@ -1,5 +1,3 @@
-import { Injectable } from '@angular/core';
-import { CoreModule } from '../core.module';
 import {
   EntityQuery,
   MetadataStore,
@@ -14,18 +12,8 @@ import {
   PredicateExpression,
   UnaryPredicate
 } from 'breeze-client/src/predicate';
+import { ISpQueryOptions } from '@app_types';
 
-export interface ISpQueryOptions {
-  $filter?: string;
-  $orderby?: string;
-  $skip?: number;
-  $top?: number;
-  $select?: string;
-  $inlinecount?: string;
-  $expand?: string;
-}
-
-@Injectable({ providedIn: CoreModule })
 export class SpUriBuilderOdataAdapter implements UriBuilderAdapter {
   constructor() {
     this.initClass();
@@ -100,7 +88,7 @@ export class SpUriBuilderOdataAdapter implements UriBuilderAdapter {
     const qoText = this.toQueryOptionsString(entityType, queryOptions);
 
     return (entityQuery.resourceName = qoText);
-  }
+  };
 
   private fragVisitorPassthru(): () => any {
     return function() {
@@ -206,7 +194,7 @@ export class SpUriBuilderOdataAdapter implements UriBuilderAdapter {
     const op = node.op.key;
     const odataOp = this.operatorMap[op];
     return odataOp || op;
-  }
+  };
 
   private toWhereODataFragment = (
     entityType: EntityType,
@@ -222,7 +210,7 @@ export class SpUriBuilderOdataAdapter implements UriBuilderAdapter {
     );
 
     return frag && frag.length > 0 ? frag : undefined;
-  }
+  };
 
   private toOrderByODataFragment(entityType: EntityType, orderByClause: any) {
     if (!orderByClause) {

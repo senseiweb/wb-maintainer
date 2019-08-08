@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { Platform } from '@angular/cdk/platform';
@@ -19,6 +19,14 @@ export class AppComponent implements OnInit {
   title = 'warbird-maintainer';
   fuseConfig: any;
 
+  displayedColumns = [
+    'id',
+    'title',
+    'iso',
+    'status',
+    'genStart',
+    'assignedAssetCount'
+  ];
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private platform: Platform,
@@ -40,16 +48,13 @@ export class AppComponent implements OnInit {
       } else {
         this.document.body.classList.remove('boxed');
       }
-
       // Color theme - Use normal for loop for IE11 compatibility
       for (let i = 0; i < this.document.body.classList.length; i++) {
         const className = this.document.body.classList[i];
-
         if (className.startsWith('theme-')) {
           this.document.body.classList.remove(className);
         }
       }
-
       this.document.body.classList.add(this.fuseConfig.colorTheme);
     });
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DataProperty, EntityType, NamingConvention } from 'breeze-client';
-import { CoreModule } from '../core.module';
+import { CoreModule } from '../../core.module';
 
 export interface ICustomClientDict {
   [index: string]: { [index: string]: string };
@@ -38,7 +38,7 @@ export class CustomNameConventionService {
   private sourceConvention: NamingConvention;
 
   constructor() {
-    console.log('Naming Convention loaded');
+    // console.log('Naming Convention loaded');
   }
 
   createNameDictionary(

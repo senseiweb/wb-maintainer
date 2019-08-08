@@ -3,7 +3,6 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { FuseConfigService } from '@fuse/services/config.service';
-import { AppNavigationService } from 'app/core/config/nav-config.service';
 
 @Component({
   selector: 'app-vertical-layout-2',
@@ -16,10 +15,7 @@ export class VerticalLayout2Component implements OnInit, OnDestroy {
 
   private unsubscribeAll: Subject<any>;
 
-  constructor(
-    private fuseConfigService: FuseConfigService,
-    navService: AppNavigationService
-  ) {
+  constructor(private fuseConfigService: FuseConfigService) {
     // Set the private defaults
     this.unsubscribeAll = new Subject();
   }

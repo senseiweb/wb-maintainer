@@ -1,4 +1,3 @@
-import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import {
   SharepointEntityList,
   SelectedEntityKind,
@@ -6,35 +5,33 @@ import {
 } from '@app_types/entity-extension';
 import { SharepointMetadata } from './sharepoint-metadata';
 import * as _l from 'lodash';
-import { SpEntityProp } from '../decorators/sp-entity-annotation/sp-entity-prop.decorator';
+import { BzEntityProp } from '../decorators/bz-entity-annotation/bz-entity-prop.decorator';
+import { BreezeEntity } from './breeze-entity';
 
-export abstract class SharepointEntity implements Entity {
-  entityAspect: EntityAspect;
-  entityType: EntityType;
+export abstract class SharepointEntity extends BreezeEntity {
+  abstract readonly shortname: string;
 
-  abstract readonly shortname: SharepointEntityList['shortname'];
-
-  @SpEntityProp('data', {
+  @BzEntityProp('data', {
     dataCfg: { isPartOfKey: true }
   })
   id?: number;
 
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   modified?: Date;
 
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   created?: Date;
 
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   authorId?: number;
 
-  @SpEntityProp('data', {})
+  @BzEntityProp('data')
   editorId?: number;
 
-  @SpEntityProp('data', {
+  @BzEntityProp('data', {
     dataCfg: {
       isNullable: false,
-      complexTypeName: '__metadata:#SP.Data'
+      complexTypeName: '__metadata:#Global'
     }
   })
   // tslint:disable-next-line: variable-name
@@ -52,8 +49,9 @@ export abstract class SharepointEntity implements Entity {
     // creates and attaches itself to the current em;
     const props = {};
     props[_l.camelCase(this.shortname)] = this;
+    childType = _l.upperFirst(childType) as any;
     Object.assign(props, defaultProps || {});
     const newEntity = em.createEntity(childType, props);
-    return newEntity as SelectedEntityKind<TChild>;
-  }
+    return (newEntity as any) as SelectedEntityKind<TChild>;
+  };
 }

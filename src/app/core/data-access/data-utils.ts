@@ -1,26 +1,24 @@
 import { SpConfig } from '../config/app-config';
 import { IBreezeScaffoldProto } from '@app_types/entity-extension';
+import { BehaviorSubject } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { DataAccessModule } from './data-access.module';
 
-export const enum MxmAppName {
-  Aagt
+@Injectable({ providedIn: DataAccessModule })
+export class DataUtils {
+  isSaving: BehaviorSubject<boolean> = new BehaviorSubject(false);
+
+  cfgFeatureSpAppSite = (appName: string): string => {
+    const site = `${
+      SpConfig.cfgSharepointMainAppSite
+    }/mx-maintainer/${appName}/_api/`;
+    return site.replace('mx-maintainer//', 'mx-maintainer/');
+  };
+
+  cfgApiAddress = (appName: string): string => {
+    const site = `${
+      SpConfig.cfgWebApplicationSite
+    }/mx-maintainer/${appName}/_api/`;
+    return site.replace('mx-maintainer//', 'mx-maintainer/');
+  };
 }
-
-// tslint:disable-next-line: ban-types
-export const MxmAssignedModels = new Map<
-  MxmAppName | 'Global',
-  IBreezeScaffoldProto[]
->();
-
-export const cfgFeatureSpAppSite = (appName: string): string => {
-  const site = `${
-    SpConfig.cfgSharepointMainAppSite
-  }/mx-maintainer/${appName}/_api/`;
-  return site.replace('mx-maintainer//', 'mx-maintainer/');
-};
-
-export const cfgApiAddress = (appName: string): string => {
-  const site = `${
-    SpConfig.cfgWebApplicationSite
-  }/mx-maintainer/${appName}/_api/`;
-  return site.replace('mx-maintainer//', 'mx-maintainer/');
-};

@@ -5,15 +5,16 @@ import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { AppInitializerService } from './core';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
+import { HomeModule } from './feature/home/home.module';
 
 const initApp = (
   appInitializer: AppInitializerService,
   fuseNavSevice: FuseNavigationService
-) => () => appInitializer.initNav(fuseNavSevice);
+) => () => appInitializer.initSpContext(fuseNavSevice);
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [CoreModule, BrowserModule, AppRoutingModule],
+  imports: [CoreModule, BrowserModule, HomeModule, AppRoutingModule],
   providers: [
     {
       provide: APP_INITIALIZER,

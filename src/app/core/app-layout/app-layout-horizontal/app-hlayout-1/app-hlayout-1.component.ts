@@ -1,8 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
-import { AppNavigationService } from 'app/core/config/nav-config.service';
 import { FuseConfigService } from '@fuse/services/config.service';
 
 @Component({
@@ -18,7 +16,6 @@ export class HorizontalLayout1Component implements OnInit, OnDestroy {
 
   constructor(
     private fuseConfigService: FuseConfigService,
-    private navigation: AppNavigationService
   ) {
     // Set the private defaults
     this.unsubscribeAll = new Subject();

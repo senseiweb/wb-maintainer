@@ -6,7 +6,8 @@ import * as _ from 'lodash';
 
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
-import { AppNavigationService } from 'app/core/config/nav-config.service';
+import { SpConfig } from 'app/core/config/app-config';
+import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 
 @Component({
   selector: 'app-layout-toolbar',
@@ -21,6 +22,7 @@ export class LayoutToolbarComponent implements OnInit, OnDestroy {
   languages: any;
   navigation: any;
   selectedLanguage: any;
+  userName: string;
   userStatusOptions: any[];
 
   private unsubscribeAll: Subject<any>;
@@ -29,7 +31,7 @@ export class LayoutToolbarComponent implements OnInit, OnDestroy {
     private fuseConfigService: FuseConfigService,
     private fuseSidebarService: FuseSidebarService,
     private translateService: TranslateService,
-    private navService: AppNavigationService
+    private navService: FuseNavigationService
   ) {
     // Set the defaults
     this.userStatusOptions = [
@@ -73,7 +75,7 @@ export class LayoutToolbarComponent implements OnInit, OnDestroy {
       }
     ];
 
-    this.navigation = this.navService.currentNavMenu.value;
+    this.navigation = this.navService.getCurrentNavigation();
 
     // Set the private defaults
     this.unsubscribeAll = new Subject();
@@ -89,6 +91,11 @@ export class LayoutToolbarComponent implements OnInit, OnDestroy {
         this.hiddenNavbar = settings.layout.navbar.hidden === true;
       });
 
+    SpConfig.cfgMy.subscribe(cfg => {
+      this.userName = `${cfg.profileProps.LastName}, ${
+        cfg.profileProps.FirstName
+      }`;
+    });
     // Set the selected language from default languages
     this.selectedLanguage = _.find(this.languages, {
       id: this.translateService.currentLang
