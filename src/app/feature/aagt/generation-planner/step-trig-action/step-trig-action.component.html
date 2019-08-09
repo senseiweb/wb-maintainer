@@ -67,7 +67,7 @@
           [disabled]="trigFormGroup.invalid"
           aria-label="SAVE"
         >
-          ADD
+          UPDATE
         </button>
         <button
           *ngIf="isNewForm"
@@ -86,8 +86,8 @@
   <div fxLayout="column" fxFlex="65">
     <h2>Action Items</h2>
     <div fxLayout="row" fxLayoutAlign="space-around stretch">
-      <div class="example-container">
-        <h3>Available</h3>
+      <div class="action-item-container">
+        <h3>All Actions</h3>
 
         <div
           cdkDropList
@@ -97,11 +97,11 @@
           [cdkDropListData]="unassignedActions"
           cdkDropListSortingDisabled
           [cdkDropListConnectedTo]="[assignedTrigActionList]"
-          class="example-list"
+          class="action-items-list"
           (cdkDropListDropped)="droppedOnActionItem($event)"
         >
           <div
-            class="example-box"
+            class="action-item-box"
             *ngFor="let actionItem of unassignedActions"
             [cdkDragData]="actionItem"
             cdkDrag
@@ -111,7 +111,7 @@
         </div>
       </div>
 
-      <div class="example-container">
+      <div class="action-item-container">
         <h3>Assigned</h3>
 
         <div
@@ -121,11 +121,11 @@
           #assignedTrigActionList="cdkDropList"
           [cdkDropListData]="assignedTrigActions"
           [cdkDropListConnectedTo]="[unassignedActionItemList]"
-          class="example-list"
+          class="action-items-list"
           (cdkDropListDropped)="droppedOnActionItem($event)"
         >
           <div
-            class="example-box"
+            class="action-item-box"
             [cdkDragData]="trigAction"
             *ngFor="let trigAction of assignedTrigActions"
             cdkDrag

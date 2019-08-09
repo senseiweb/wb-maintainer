@@ -255,6 +255,9 @@ export class PlanTrigActionComponent implements OnInit, OnDestroy {
          * really mean to create a new trigger.
          */
         if (trigger === 'new') {
+          fgControls.milestone.reset();
+          fgControls.triggerStart.reset();
+
           fgControls.milestone.setValue('', {
             emitEvent: false
           });
