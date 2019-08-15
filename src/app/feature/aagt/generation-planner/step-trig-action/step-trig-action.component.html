@@ -24,7 +24,13 @@
       <div fxLayout="row" fxLayoutAlign="start start">
         <mat-form-field appearance="outline" fxFlex>
           <mat-label>Trigger Milestone</mat-label>
-          <input name="milestone" formControlName="milestone" matInput />
+          <input name="milestone" [errorStateMatcher]="formErrMatcher" formControlName="milestone" matInput />
+          <mat-error *ngIf="trigFormGroup.get('milestone')?.errors?.required">
+            A milestone is required.
+          </mat-error>
+          <mat-error *ngIf="trigFormGroup.errors?.duplicateTriggerMiles">
+            Milestone already exists for generation
+          </mat-error>
         </mat-form-field>
       </div>
 
@@ -64,7 +70,7 @@
           color="accent"
           class="save-button"
           (click)="addNewTrigger()"
-          [disabled]="trigFormGroup.invalid"
+          [disabled]="trigFormGroup.invalid || trigFormGroup.pristine"
           aria-label="SAVE"
         >
           UPDATE

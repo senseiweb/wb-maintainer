@@ -32,6 +32,7 @@ import { BreezeEntity } from 'app/core/data-models';
 export const bzPropValidatorWrapper = (validator: Validator) => {
   return (c: AbstractControl): { [error: string]: any } => {
     let currentValue = c.value;
+    const validatorName = validator.name || (validator.context && validator.context['name']);
     /**
      * Mat-Date Picker uses momentjs dates in form controls,
      */
@@ -39,7 +40,7 @@ export const bzPropValidatorWrapper = (validator: Validator) => {
       currentValue = c.value.toDate();
     }
     const result = validator.validate(currentValue, validator.context);
-    return result ? { [currentValue]: result.errorMessage } : null;
+    return result ? { [validatorName]: result.errorMessage } : null;
   };
 };
 
@@ -64,7 +65,7 @@ export const bzEntityValidatorWrapper = (
 
       const result = validator.validate(entity, validator.context);
       /** The validator name that will be added the formgroup.errors.[NAME] */
-      const validatorName = `${entity.shortname}_${validator.name}`;
+      const validatorName = `${validator.name}`;
       return result ? { [validatorName]: result.errorMessage } : null;
     };
   };

@@ -6,7 +6,7 @@ import {
   OnDestroy
 } from '@angular/core';
 import { fuseAnimations } from '@fuse/animations';
-import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
+import { FormGroup, FormControl, FormBuilder, FormGroupDirective } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PlanGenResolvedData } from '../gen-planner-resolver.service';
 import {
@@ -23,12 +23,14 @@ import Swal, { SweetAlertOptions } from 'sweetalert2';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ErrorStateMatcher } from '@angular/material';
 
 type TrigModelProps =
   | keyof Pick<Trigger, 'milestone' | 'triggerStart'>
   | 'triggerSelection';
 
 type TrigFormModel = { [key in TrigModelProps]: FormControl };
+
 
 @Component({
   selector: 'app-plan-trig-action',
@@ -37,12 +39,13 @@ type TrigFormModel = { [key in TrigModelProps]: FormControl };
   animations: fuseAnimations,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PlanTrigActionComponent implements OnInit, OnDestroy {
+export class PlanTrigActionComponent implements OnInit, OnDestroy, ErrorStateMatcher {
   private allActionItems: ActionItem[];
   assignedTrigActions: TriggerAction[];
   currentGen: Generation;
   currentTrigger: Trigger;
   isNewForm: boolean;
+  formErrMatcher: ErrorStateMatcher;
   trigFormGroup: IAppFormGroup<TrigFormModel>;
   triggerList: Trigger[];
   triggerShell: { milestone: string; triggerStart: Date };
@@ -69,6 +72,11 @@ export class PlanTrigActionComponent implements OnInit, OnDestroy {
 
     this.currentGen = genRouteData[0];
 
+    this.formErrMatcher = {
+      isErrorState(control: FormControl, form: FormGroupDirective): boolean {
+        return control && control.dirty && form && form.invalid;
+      }
+    }
     /**
      * Make a copy of the generation triggers so we can better
      * contol the when triggers are actual created vs using the
@@ -95,7 +103,12 @@ export class PlanTrigActionComponent implements OnInit, OnDestroy {
     newTrigger.milestone = fgControls.milestone.value;
     newTrigger.triggerStart = fgControls.triggerStart.value;
     this.triggerList = [...this.currentGen.triggers];
-    fgControls.triggerSelection.setValue(newTrigger);
+    this.trigFormGroup.reset({
+      triggerSelection: newTrigger,
+      milestone: newTrigger.milestone,
+      triggerStart: newTrigger.triggerStart
+    },{emitEvent: false});
+    this.isNewForm = false;
   }
 
   createFormGroupAndValidators(): void {
@@ -163,26 +176,14 @@ export class PlanTrigActionComponent implements OnInit, OnDestroy {
     );
   }
 
+  isErrorState(frmCntrl: FormControl, frmDirective: FormGroupDirective): boolean {
+    return frmCntrl.dirty && frmDirective.invalid;
+  }
+
   setDefaultTrigger(): void {
     this.currentTrigger = this.currentGen.triggers[0];
     this.resetBasedOnTrigger();
     this.isNewForm = false;
-  }
-
-  resetBasedOnTrigger(): void {
-    if (!this.currentTrigger) {
-      this.assignedTrigActions = [];
-      this.unassignedActions = [...this.allActionItems];
-      return;
-    }
-
-    this.assignedTrigActions = [...this.currentTrigger.triggerActions];
-
-    this.unassignedActions = _l.differenceWith(
-      this.allActionItems,
-      this.currentTrigger.triggerActions,
-      (a: ActionItem, b: TriggerAction) => a.id === b.actionItemId
-    );
   }
 
   sortTriggerAction(): void {
@@ -242,8 +243,42 @@ export class PlanTrigActionComponent implements OnInit, OnDestroy {
     return result.value;
   }
 
+  resetBasedOnTrigger(): void {
+    if (!this.currentTrigger) {
+      this.assignedTrigActions = [];
+      this.unassignedActions = [...this.allActionItems];
+      return;
+    }
+
+    this.assignedTrigActions = [...this.currentTrigger.triggerActions];
+
+    this.unassignedActions = _l.differenceWith(
+      this.allActionItems,
+      this.currentTrigger.triggerActions,
+      (a: ActionItem, b: TriggerAction) => a.id === b.actionItemId
+    );
+  }
+
+  updateTrigger(): void  {
+    const fgControls = this.trigFormGroup.controls;
+    const updatedMilestone = fgControls.milestone.value;
+    const updatedStart = fgControls.triggerStart.value;
+
+    this.currentTrigger.milestone = updatedMilestone;
+    this.currentTrigger.triggerStart = updatedStart;
+
+    fgControls.milestone.reset(updatedMilestone, {emitEvent: false});
+    fgControls.triggerStart.reset(updatedStart, {emitEvent: false});
+    this.trigFormGroup.reset({}, { onlySelf: true, emitEvent: false});
+  }
+
   watchFormModel(): void {
     const fgControls = this.trigFormGroup.controls;
+
+    fgControls.milestone.valueChanges.subscribe(_ => {
+      console.log(this.trigFormGroup.errors);
+      console.log(this.trigFormGroup.controls.milestone.errors);
+    })
 
     fgControls.triggerSelection.valueChanges
       .pipe(takeUntil(this.unsubscribeAll))
@@ -280,11 +315,11 @@ export class PlanTrigActionComponent implements OnInit, OnDestroy {
           .getRelatedEntityType('trigger')
           .custom.setFormValidators(this.trigFormGroup, trigger);
 
-        fgControls.milestone.setValue(trigger.milestone, { emitEvent: false });
-
-        fgControls.triggerStart.setValue(trigger.triggerStart, {
-          emitEvent: false
-        });
+          this.trigFormGroup.reset({
+            triggerSelection: trigger,
+            milestone: trigger.milestone,
+            triggerStart: trigger.triggerStart
+          },{emitEvent: false});
 
         this.resetBasedOnTrigger();
       });
