@@ -1,0 +1,18 @@
+<div
+  id="step-sched-task"
+  [@animate]="{ value: '*', params: { y: '100%' } }"
+  fxLayout="row"
+  fxLayoutAlign="space-between stretch"
+  fxFlex="100"
+>
+  <div style="display: block " class="control-section">
+    <ejs-gantt
+      id="taskSched"
+      height="430px"
+      [dataSource]="data"
+      [taskFields]="taskSettings"
+      [projectStartDate]="projectStartDate"
+      [projectEndDate]="projectEndDate"
+    ></ejs-gantt>
+  </div>
+</div>

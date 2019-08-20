@@ -55,32 +55,32 @@ export class Trigger extends SharepointEntity {
   })
   triggerActions?: TriggerAction[];
 
-  @BzCustomValidator<Trigger>({
-    validatorScope: 'entity',
-    targetedProperty: 'milestone',
-    reqProps: ['milestone']
-  })
-  protected duplicateTriggerMiles?(): Validator {
-    const validatorName = 'duplicateTriggerMiles';
-    const validatorFn = (entity: this, ctx: any): boolean => {
-      let isValid = true;
-      if (!ctx || !ctx.milestone) {
-        return isValid;
-      }
-      isValid = !entity.generation.triggers.some(
-        trig =>
-          trig.milestone &&
-          trig.milestone.toLowerCase() === ctx.milestone.toLowerCase()
-      );
-      return isValid;
-    };
-    const additionalCtx = {
-      message: context =>
-        `The milesont "${
-          context.milestone
-        }" matches an already existing milestone for this generation!`
-    };
+  // @BzCustomValidator<Trigger>({
+  //   validatorScope: 'entity',
+  //   targetedProperty: 'milestone',
+  //   reqProps: ['milestone']
+  // })
+  // protected duplicateTriggerMiles?(): Validator {
+  //   const validatorName = 'duplicateTriggerMiles';
+  //   const validatorFn = (entity: this, ctx: any): boolean => {
+  //     let isValid = true;
+  //     if (!ctx || !ctx.milestone) {
+  //       return isValid;
+  //     }
+  //     isValid = !entity.generation.triggers.some(
+  //       trig =>
+  //         trig.milestone &&
+  //         trig.milestone.toLowerCase() === ctx.milestone.toLowerCase()
+  //     );
+  //     return isValid;
+  //   };
+  //   const additionalCtx = {
+  //     message: context =>
+  //       `The milesont "${
+  //         context.milestone
+  //       }" matches an already existing milestone for this generation!`
+  //   };
 
-    return new Validator(validatorName, validatorFn, additionalCtx);
-  }
+  //   return new Validator(validatorName, validatorFn, additionalCtx);
+  // }
 }

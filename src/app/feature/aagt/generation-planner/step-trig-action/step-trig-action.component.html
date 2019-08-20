@@ -10,10 +10,13 @@
     <h3>Details</h3>
     <form [formGroup]="trigFormGroup">
       <div fxLayout="row" fxLayoutAlign="start start">
-        <mat-form-field appearance="float" [floatLabel]="'always'" fxFlex>
+        <mat-form-field appearance="outline" [floatLabel]="'always'" fxFlex>
           <mat-label>Generation Triggers</mat-label>
           <mat-select formControlName="triggerSelection">
-            <mat-option *ngFor="let trigger of triggerList" [value]="trigger">
+            <mat-option
+              *ngFor="let trigger of triggerList; trackBy: trackById"
+              [value]="trigger"
+            >
               Trigger For: {{ trigger.milestone }}
             </mat-option>
             <mat-option [value]="'new'">Add New Trigger</mat-option>
@@ -24,7 +27,12 @@
       <div fxLayout="row" fxLayoutAlign="start start">
         <mat-form-field appearance="outline" fxFlex>
           <mat-label>Trigger Milestone</mat-label>
-          <input name="milestone" [errorStateMatcher]="formErrMatcher" formControlName="milestone" matInput />
+          <input
+            name="milestone"
+            [errorStateMatcher]="formErrMatcher"
+            formControlName="milestone"
+            matInput
+          />
           <mat-error *ngIf="trigFormGroup.get('milestone')?.errors?.required">
             A milestone is required.
           </mat-error>
@@ -57,7 +65,7 @@
           mat-stroked-button
           color="warn"
           class="mr-8"
-          (click)="deleteGeneration()"
+          (click)="deleteTrigger()"
           aria-label="Delete"
           matTooltip="Delete"
         >
@@ -69,7 +77,7 @@
           mat-stroked-button
           color="accent"
           class="save-button"
-          (click)="addNewTrigger()"
+          (click)="updateTrigger()"
           [disabled]="trigFormGroup.invalid || trigFormGroup.pristine"
           aria-label="SAVE"
         >
@@ -105,14 +113,29 @@
           [cdkDropListConnectedTo]="[assignedTrigActionList]"
           class="action-items-list"
           (cdkDropListDropped)="droppedOnActionItem($event)"
+          matRipple
         >
           <div
             class="action-item-box"
-            *ngFor="let actionItem of unassignedActions"
+            *ngFor="let actionItem of unassignedActions; trackBy: trackById"
             [cdkDragData]="actionItem"
             cdkDrag
           >
-            {{ actionItem.action }}
+            <div fxLayout="row" fxFlex="45">
+              Action: {{ actionItem.action }}
+            </div>
+            <div fxLayout="row" fxFlex="45">
+              Est Duration:
+              {{ actionItem.duration }} mins
+            </div>
+            <div class="example-handle" cdkDragHandle>
+              <svg width="14px" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"
+                ></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -128,16 +151,23 @@
           [cdkDropListData]="assignedTrigActions"
           [cdkDropListConnectedTo]="[unassignedActionItemList]"
           class="action-items-list"
-          (cdkDropListDropped)="droppedOnActionItem($event)"
+          (cdkDropListDropped)="droppedOnTrigAction($event)"
         >
           <div
             class="action-item-box"
             [cdkDragData]="trigAction"
-            *ngFor="let trigAction of assignedTrigActions"
+            *ngFor="
+              let trigAction of assignedTrigActions;
+              index as i;
+              trackBy: trackById
+            "
             cdkDrag
           >
-            Action Sequence: {{ trigAction.sequence }} | Tasks Run Time:
+            Action Sequence: {{ trigAction.sequence }} | Action Duration:
             {{ trigAction.actionItem.duration }}
+            <br />
+            Cummlative Run Time:
+            {{ calculateCummRunTime(i) | minFormat }}
           </div>
         </div>
       </div>
