@@ -5,14 +5,44 @@
   fxLayoutAlign="space-between stretch"
   fxFlex="100"
 >
-  <div style="display: block " class="control-section">
+  <div style="display: block" class="control-section">
     <ejs-gantt
+      #taskSched
       id="taskSched"
-      height="430px"
-      [dataSource]="data"
+      height="600px"
+      [allowFiltering]="true"
+      [dataSource]="generationTasks"
+      [includeWeekend]="true"
+      [dateFormat]="'dd-MMM HHmm'"
+      [columns]="ganttColumns"
+      [durationUnit]="'minute'"
+      [highlightWeekends]="true"
+      [timelineSettings]="timeLineSettings"
       [taskFields]="taskSettings"
-      [projectStartDate]="projectStartDate"
-      [projectEndDate]="projectEndDate"
-    ></ejs-gantt>
+      [toolbar]="toolbarSettings"
+      [editSettings]="editSettings"
+      [selectionSettings]="selectionSettings"
+      [editDialogFields]="editDialogFields"
+      [eventMarkers]="triggerMarkers"
+      [projectStartDate]="currentGen.genStartDate"
+      [projectEndDate]="currentGen.genEndDate"
+      [dayWorkingTime]="dayWorkTime"
+      [enableContextMenu]="true"
+      [contextMenuItems]="contextMenuItems"
+      [gridLines]="'Both'"
+      (contextMenuClick)="contextMenuClick($event)"
+      (actionBegin)="taskEditSave($event)"
+      (actionComplete)="taskEditSave($event)"
+    >
+      <e-edit-dialog-fields>
+        <e-edit-dialog-field type="General" headerText="General"
+          ><p>Hello World</p></e-edit-dialog-field
+        >
+        <e-edit-dialog-field
+          type="Dependency"
+          headerText="Dependency"
+        ></e-edit-dialog-field>
+      </e-edit-dialog-fields>
+    </ejs-gantt>
   </div>
 </div>

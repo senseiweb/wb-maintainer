@@ -1,9 +1,4 @@
-import {
-  RawEntity,
-  EntityList,
-  EntityChildrenKind,
-  SelectedEntityKind
-} from '@app_types';
+import { RawEntity, EntityList, PropsOfType, PropsNotOfType } from '@app_types';
 import {
   EntityType,
   EntityState,
@@ -16,6 +11,7 @@ import {
 } from 'breeze-client';
 import * as _m from 'moment';
 import { BreezeEntity } from '../data-models';
+import { ActionItem } from 'app/feature/aagt/aagt-core';
 
 interface IRepoPredicateCache {
   [index: string]: _m.Moment;
@@ -121,8 +117,8 @@ export class CoreRepo<TRepoFor extends BreezeEntity> {
     ) as any) as BreezeEntity[]).some(et => et.id === id);
   }
 
-  makePredicate<T extends BreezeEntity>(
-    property: keyof T | keyof TRepoFor,
+  makePredicate(
+    property: PropsNotOfType<TRepoFor, Function>,
     condition: string | number,
     filter = FilterQueryOp.Equals
   ): Predicate {
@@ -146,6 +142,7 @@ export class CoreRepo<TRepoFor extends BreezeEntity> {
     const eType = this.entityManager.metadataStore.getEntityType(
       entityName
     ) as EntityType;
+
     const query = EntityQuery.from(eType.defaultResourceName)
       .toType(eType)
       .select((eType.custom as any).defaultSelect);
@@ -199,7 +196,7 @@ export class CoreRepo<TRepoFor extends BreezeEntity> {
     return this.executeCacheQuery(query) as TRepoFor[];
   }
 
-  async saveEntityChanges(): Promise<SaveResult> {
+  async saveChangesForEntityType(): Promise<SaveResult> {
     const entities = (this.entityManager.getChanges(
       this.entityType
     ) as any) as BreezeEntity[];
@@ -211,8 +208,12 @@ export class CoreRepo<TRepoFor extends BreezeEntity> {
         et.entityAspect.setDeleted();
       }
     });
-
-    const results = await this.entityManager.saveChanges(entities as any);
+    this.entityManager.isSaving.next(true);
+    const results = await this.entityManager
+      .saveChanges(entities as any)
+      .finally(() => {
+        this.entityManager.isSaving.next(false);
+      });
     return results;
   }
 }

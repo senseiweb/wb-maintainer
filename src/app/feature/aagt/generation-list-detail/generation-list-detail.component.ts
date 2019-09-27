@@ -3,16 +3,7 @@ import { Generation, AssetTriggerAction } from '../aagt-core';
 import { ActivatedRoute } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import * as _m from 'moment';
-
-export interface IAtasGantt {
-  id: number;
-  name: string;
-  startDate: Date;
-  endDate?: Date;
-  duration?: number;
-  progress: number;
-  parentId?: number;
-}
+import { IAtasGantt } from '@app_types';
 
 @Component({
   templateUrl: './generation-list-detail.component.html',
@@ -161,7 +152,7 @@ export class GenerationListDetailComponent implements OnInit {
               .duration(_m(assetTask.plannedStop).diff(assetTask.plannedStart))
               .asMinutes()
           };
-          
+
           this.genTasks.push(assetTaskDataPoint);
 
           const isLastTaskForAsset = assetTaskIdx === assetTasksLength - 1;
@@ -187,7 +178,6 @@ export class GenerationListDetailComponent implements OnInit {
               _m(trigGraphDataPoint.endDate).diff(trigGraphDataPoint.startDate)
             )
             .asMinutes();
-
         }
       }
     });

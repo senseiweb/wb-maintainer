@@ -17,14 +17,6 @@ export class Team extends SharepointEntity {
   @BzEntityProp('data')
   teamCategoryId: number;
 
-  @BzEntityProp('nav', {
-    navCfg: {
-      isScalar: true
-    },
-    relativeEntity: 'teamCategory'
-  })
-  teamCategory: TeamCategory;
-
   @BzEntityProp('data')
   numTeamMembers: number;
 

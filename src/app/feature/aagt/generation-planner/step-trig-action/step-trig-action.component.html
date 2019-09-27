@@ -33,10 +33,12 @@
             formControlName="milestone"
             matInput
           />
-          <mat-error *ngIf="trigFormGroup.get('milestone')?.errors?.required">
+          <mat-error
+            *ngIf="trigFormGroup?.controls.milestone?.hasError('required')"
+          >
             A milestone is required.
           </mat-error>
-          <mat-error *ngIf="trigFormGroup.errors?.duplicateTriggerMiles">
+          <mat-error *ngIf="!!trigFormGroup.hasError('duplicateTriggerMiles')">
             Milestone already exists for generation
           </mat-error>
         </mat-form-field>
@@ -105,7 +107,7 @@
 
         <div
           cdkDropList
-          [cdkDropListDisabled]="trigFormGroup.invalid"
+          [cdkDropListDisabled]="trigFormGroup.invalid || trigFormGroup.dirty"
           fusePrefectScroll
           #unassignedActionItemList="cdkDropList"
           [cdkDropListData]="unassignedActions"
@@ -118,6 +120,7 @@
           <div
             class="action-item-box"
             *ngFor="let actionItem of unassignedActions; trackBy: trackById"
+            [class.inactive]="trigFormGroup.invalid || trigFormGroup.dirty"
             [cdkDragData]="actionItem"
             cdkDrag
           >
@@ -145,7 +148,7 @@
 
         <div
           cdkDropList
-          [cdkDropListDisabled]="trigFormGroup.invalid"
+          [cdkDropListDisabled]="trigFormGroup.invalid || trigFormGroup.dirty"
           fusePrefectScroll
           #assignedTrigActionList="cdkDropList"
           [cdkDropListData]="assignedTrigActions"
@@ -156,6 +159,7 @@
           <div
             class="action-item-box"
             [cdkDragData]="trigAction"
+            [class.inactive]="trigFormGroup.invalid || trigFormGroup.dirty"
             *ngFor="
               let trigAction of assignedTrigActions;
               index as i;
@@ -163,7 +167,8 @@
             "
             cdkDrag
           >
-            Action Sequence: {{ trigAction.sequence }} | Action Duration:
+            Action: ({{ trigAction.sequence }})
+            {{ trigAction.actionItem.action }} | Action Duration:
             {{ trigAction.actionItem.duration }}
             <br />
             Cummlative Run Time:

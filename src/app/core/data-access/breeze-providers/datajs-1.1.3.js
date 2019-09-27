@@ -7620,7 +7620,7 @@
         var model = context.metadata;
         var dataServiceVersion = context.dataServiceVersion;
         var dateParser = parseJsonDateString;
-        var json = (typeof text === "string") ? window.JSON.parse(text) : text;
+        var json = (typeof text === "string" && text) ? window.JSON.parse(text) : text;
 
         if ((maxVersion("3.0", dataServiceVersion) === dataServiceVersion)) {
             if (isJsonLight(context.contentType)) {

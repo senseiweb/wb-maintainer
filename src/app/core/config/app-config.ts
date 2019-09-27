@@ -2,15 +2,16 @@ import { FuseNavigationService } from '@fuse/components/navigation/navigation.se
 import { FuseNavigation } from '@fuse/types';
 import { BehaviorSubject } from 'rxjs';
 import { ISPUserProfileProperties } from '@app_types/sharepoint-entities';
+import { environment } from '../../../environments';
 
 export class SpConfig {
-  static cfgWebApplicationSite = 'http://localhost:4200';
+  static cfgWebApplicationSite = environment.lclDevelopment
+    ? 'http://localhost:4200'
+    : 'https://usaf.dps.mil/teams/5MXG-WM';
 
   /** Dynamically added by App initializer to determine the URL location */
   static cfgSharepointMainAppSite = '';
 
-  // static cfgWebApplicationSite = 'https://usaf.dps.mil/teams/5MXG-WM';
-  // static cfgSharepointMainAppSite = 'https://usaf.dps.mil/teams/5MXG-WM';
   static cfgFuseNavService: FuseNavigationService;
   static spClientCtx: SP.ClientContext;
   static spWeb: SP.Web;

@@ -13,7 +13,9 @@ import {
   MatTabsModule,
   MatSlideToggleModule,
   MatPaginatorModule,
-  MatSortModule
+  MatSortModule,
+  MatSnackBarModule,
+  MatProgressBarModule
 } from '@angular/material';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FuseSharedModule } from '@fuse/shared.module';
@@ -39,7 +41,9 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
     MatStepperModule,
     MatSlideToggleModule,
     DragDropModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatSnackBarModule,
+    MatProgressBarModule
   ],
   exports: [
     MatSortModule,
@@ -59,7 +63,9 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
     MatSlideToggleModule,
     MatStepperModule,
     DragDropModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatSnackBarModule,
+    MatProgressBarModule
   ],
   providers: []
 })

@@ -57,7 +57,6 @@
         <ejs-datetimepicker
           fxFlex
           floatLabelType="Auto"
-          [min]="minDate"
           matInput
           name="genStartDate"
           formControlName="genStartDate"
@@ -72,7 +71,6 @@
         fxLayoutAlign="end center"
       >
         <button
-          *ngIf="formMode === 'edit'"
           mat-stroked-button
           color="warn"
           class="mr-8"
@@ -84,27 +82,14 @@
         </button>
 
         <button
-          *ngIf="formMode !== 'edit'"
           mat-stroked-button
           color="accent"
           class="save-button"
-          (click)="saveChanges()"
-          [disabled]="genFormGroup.invalid"
+          (click)="updateGenData()"
+          [disabled]="genFormGroup.invalid || genFormGroup.pristine"
           aria-label="SAVE"
         >
-          ADD
-        </button>
-
-        <button
-          *ngIf="formMode === 'edit'"
-          mat-stroked-button
-          color="accent"
-          class="save-button"
-          (click)="saveChanges()"
-          [disabled]="genFormGroup.invalid"
-          aria-label="SAVE"
-        >
-          UPDATE
+          UPDATE GEN DATA
         </button>
       </div>
     </form>
@@ -120,7 +105,7 @@
           fusePrefectScroll
           #unassignedAssetList="cdkDropList"
           [cdkDropListData]="unassignedAssets"
-          [cdkDropListDisabled]="genFormGroup.invalid"
+          [cdkDropListDisabled]="genFormGroup.invalid || genFormGroup.dirty"
           cdkDropListSortingDisabled
           [cdkDropListConnectedTo]="[assignedAssetList]"
           class="example-list"
@@ -128,6 +113,7 @@
         >
           <div
             class="example-box"
+            [class.inactive]="genFormGroup.invalid || genFormGroup.dirty"
             *ngFor="let asset of unassignedAssets"
             [cdkDragData]="asset"
             cdkDrag
@@ -144,7 +130,7 @@
           cdkDropList
           fusePrefectScroll
           #assignedAssetList="cdkDropList"
-          [cdkDropListDisabled]="genFormGroup.invalid"
+          [cdkDropListDisabled]="genFormGroup.invalid || genFormGroup.dirty"
           [cdkDropListData]="assignedAssets"
           [cdkDropListConnectedTo]="[unassignedAssetList]"
           class="example-list"
@@ -153,6 +139,7 @@
           <div
             class="example-box"
             [cdkDragData]="genAsset"
+            [class.inactive]="genFormGroup.invalid || genFormGroup.dirty"
             *ngFor="let genAsset of assignedAssets"
             cdkDrag
           >

@@ -19,7 +19,8 @@ import {
   Asset,
   TriggerAction,
   ActionItem,
-  Trigger
+  Trigger,
+  AagtUowService
 } from '../../aagt-core';
 import { RawEntity, IAppFormGroup } from '@app_types';
 import * as _m from 'moment';
@@ -52,6 +53,7 @@ export class PlanTrigActionComponent
   currentTrigger: Trigger;
   isNewForm: boolean;
   formErrMatcher: ErrorStateMatcher;
+  minDate: Date;
   trigFormGroup: IAppFormGroup<TrigFormModel>;
   triggerList: Trigger[];
   triggerShell: { milestone: string; triggerStart: Date };
@@ -67,7 +69,8 @@ export class PlanTrigActionComponent
   constructor(
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private uow: AagtUowService
   ) {
     this.unsubscribeAll = new Subject();
   }
@@ -90,7 +93,9 @@ export class PlanTrigActionComponent
      */
     this.triggerList = [...this.currentGen.triggers];
     this.unassignedActions = this.allActionItems = genRouteData[2];
+    this.setMinDate();
     this.createFormGroupAndValidators();
+    this.watchModelForChanges();
   }
 
   ngOnDestroy(): void {
@@ -202,12 +207,12 @@ export class PlanTrigActionComponent
     if (result.value) {
       const fgControls = this.trigFormGroup.controls;
 
-      const genTasks = _l.flatMap(
-        this.currentTrigger.triggerActions,
-        x => x.assetTriggerActions
-      );
+      // const genTasks = _l.flatMap(
+      //   this.currentTrigger.triggerActions,
+      //   x => x.assetTriggerActions
+      // );
 
-      genTasks.forEach(gt => gt.entityAspect.setDeleted());
+      // genTasks.forEach(gt => gt.entityAspect.setDeleted());
 
       this.currentTrigger.triggerActions.forEach(ta =>
         ta.entityAspect.setDeleted()
@@ -264,9 +269,9 @@ export class PlanTrigActionComponent
 
       this.sortTriggerAction();
 
-      trigAction.assetTriggerActions
-        .filter(ata => ata.generationAssetId === ata.id)
-        .forEach(ata => ata.entityAspect.setDeleted());
+      // trigAction.assetTriggerActions
+      //   .filter(ata => ata.generationAssetId === ata.id)
+      //   .forEach(ata => ata.entityAspect.setDeleted());
 
       trigAction.entityAspect.setDeleted();
 
@@ -340,6 +345,10 @@ export class PlanTrigActionComponent
     this.isNewForm = false;
   }
 
+  setMinDate(): void {
+    this.minDate = this.currentGen.genStartDate;
+  }
+
   sortTriggerAction(): void {
     const numOfTrigActions = this.assignedTrigActions.length;
 
@@ -359,8 +368,14 @@ export class PlanTrigActionComponent
 
   updateTrigger(): void {
     const fgControls = this.trigFormGroup.controls;
+    const currentMilestone = this.currentTrigger.milestone || '';
 
-    if (this.doesMileStoneExist(fgControls.milestone.value)) {
+    if (
+      fgControls.milestone.dirty &&
+      fgControls.milestone.value.toLowerCase() !==
+        currentMilestone.toLowerCase() &&
+      this.doesMileStoneExist(fgControls.milestone.value)
+    ) {
       return;
     }
 
@@ -369,10 +384,19 @@ export class PlanTrigActionComponent
 
     this.currentTrigger.milestone = updatedMilestone;
     this.currentTrigger.triggerStart = updatedStart;
+    // this.trigFormGroup.reset(this.currentTrigger, { onlySelf: true, emitEvent: false });
 
-    fgControls.milestone.reset(updatedMilestone, { emitEvent: false });
-    fgControls.triggerStart.reset(updatedStart, { emitEvent: false });
-    this.trigFormGroup.reset({}, { onlySelf: true, emitEvent: false });
+    fgControls.triggerSelection.setValue(this.currentTrigger);
+
+    // fgControls.milestone.reset(updatedMilestone, { emitEvent: false });
+    // fgControls.triggerStart.reset(updatedStart, { emitEvent: false });
+  }
+
+  watchModelForChanges(): void {
+    this.uow.entityManager
+      .onModelChanges('generation', 'PropertyChange', 'genStartDate')
+      .pipe(takeUntil(this.unsubscribeAll))
+      .subscribe(_ => this.setMinDate());
   }
 
   watchFormModel(): void {

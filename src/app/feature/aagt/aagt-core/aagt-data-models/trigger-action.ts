@@ -49,18 +49,7 @@ export class TriggerAction extends SharepointEntity {
   averageExecutedTime?: number;
 
   @BzEntityProp('data')
-  get sequence(): number {
-    return this._sequence;
-  }
-  set sequence(newSequence: number) {
-    this.assetTriggerActions.forEach(ata => {
-      if (!ata.sequence || ata.sequence === this._sequence) {
-        ata.sequence = newSequence;
-      }
-    });
-
-    this._sequence = newSequence;
-  }
+ sequence: number;
 
   @BzEntityProp('data')
   actionItemId: number;

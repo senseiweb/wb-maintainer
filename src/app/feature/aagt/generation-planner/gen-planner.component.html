@@ -19,6 +19,12 @@
             </ng-template>
             <app-plan-trig-action></app-plan-trig-action>
           </mat-step>
+          <mat-step [completed]="">
+            <ng-template matStepLabel>
+              <span>Plan Generation Tasks</span>
+            </ng-template>
+            <app-plan-sched-task></app-plan-sched-task>
+          </mat-step>
         </mat-horizontal-stepper>
       </div>
     </div>

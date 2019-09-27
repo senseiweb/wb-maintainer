@@ -67,7 +67,7 @@ export class CustomNameConventionService {
         if (
           propDef &&
           propDef.parentType &&
-          propDef.parentType.name === '__metadata:#SP.Data'
+          propDef.parentType.name === '__metadata:#Global'
         ) {
           return namer;
         }
@@ -87,7 +87,7 @@ export class CustomNameConventionService {
         if (
           propDef &&
           propDef.parentType &&
-          propDef.name === '__metada__metadata:#SP.Datata'
+          propDef.name === '__metadata:#Global'
         ) {
           return namer;
         }

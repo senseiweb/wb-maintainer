@@ -149,6 +149,11 @@ export function BzEntityProp<TPropKind extends BzPropDecoratorKind>(
     proto: any,
     key: string
   ): void => {
+    if (key === 'shortname') {
+      console.log(proto);
+      console.log(key);
+    }
+
     /**
      * Check if the class has the propCollection attribute already, if not add it to
      * the class as non enumerable so that Breeze does not add it as unmapped property

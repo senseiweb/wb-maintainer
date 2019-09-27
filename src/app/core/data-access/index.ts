@@ -4,7 +4,6 @@ export * from './em-service-factory/emServiceProviderFactory';
 export * from './em-service-factory/emServiceProviderConfig.service';
 export * from './core-repo';
 export * from './core-sharepoint-repo';
-export * from './data-utils';
 export * from './script-loader.service';
 export * from './breeze-providers/sharepoint-dataservice';
 export * from './breeze-providers/sp-query.dataservice';

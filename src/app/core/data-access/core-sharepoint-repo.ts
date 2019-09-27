@@ -9,16 +9,34 @@ import {
   FilterQueryOp,
   QueryResult
 } from 'breeze-client';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-type SpChoiceCache<T> = { [index in keyof T]: string[] };
+export type SpChoiceCache<T> = {
+  [index in keyof T]: {
+    values: string[];
+    editUri: string;
+    type: string;
+    defaultValue: string;
+  };
+};
+
+export type SpChoiceResult = [string, string[]];
 
 export class CoreSharepointRepo<T extends SharepointEntity> extends CoreRepo<
   T
 > {
+  private commonHttpHeaders = {
+    DataServiceVersion: '3.0',
+    MaxDataServiceVersion: '3.0',
+    Accept: 'application/json;odata=nometadata',
+    'Content-Type': 'application/json;odata=verbose',
+    'X-RequestDigest': undefined
+  };
   private spChoiceFieldCache: SpChoiceCache<T> = {} as any;
 
   constructor(
     entityTypeName: SharepointEntityList['shortname'],
+    private httpClient: HttpClient,
     protected entityManager: EntityManager
   ) {
     super(entityTypeName, entityManager);
@@ -32,10 +50,55 @@ export class CoreSharepointRepo<T extends SharepointEntity> extends CoreRepo<
     return super.executeQuery(query);
   }
 
-  async spChoiceFields(fieldName: keyof T): Promise<string[]> {
-    const cached = this.spChoiceFieldCache[fieldName];
-    if (cached) {
-      return cached;
+  async updateSpChoiceFields(
+    fieldName: keyof T,
+    values: string[]
+  ): Promise<string[]> {
+    const cachedSpChoiceData = this.spChoiceFieldCache[fieldName];
+
+    const digest = await this.entityManager.dataService.getRequestDigest();
+
+    const payload = {
+      __metadata: { type: 'SP.FieldChoice' },
+      Choices: {
+        results: values
+      }
+    };
+
+    const updateHeaders = {
+      'X-HTTP-METHOD': 'MERGE',
+      'IF-MATCH': '*'
+    };
+    this.commonHttpHeaders['X-RequestDigest'] = digest;
+
+    const requestHeaders = new HttpHeaders(
+      Object.assign(updateHeaders, this.commonHttpHeaders)
+    );
+
+    const response = await this.httpClient
+      .post(cachedSpChoiceData.editUri, payload, {
+        headers: requestHeaders
+      })
+      .toPromise();
+
+    cachedSpChoiceData.values = values;
+    return values;
+  }
+
+  spChoiceFields(fieldName: keyof T, onlyCached?: boolean): SpChoiceResult;
+  spChoiceFields(
+    fieldName: keyof T,
+    onlyCached?: boolean
+  ): Promise<SpChoiceResult> | SpChoiceResult {
+    let cached = this.spChoiceFieldCache[fieldName];
+
+    if (onlyCached || cached) {
+      if (!cached) {
+        throw new Error(
+          'Cached data was demanded but not available on the client!'
+        );
+      }
+      return [cached.defaultValue, cached.values];
     }
 
     const defaultResourceName = this.entityType.defaultResourceName;
@@ -58,16 +121,21 @@ export class CoreSharepointRepo<T extends SharepointEntity> extends CoreRepo<
 
     let response: QueryResult;
 
-    try {
+    return (async () => {
       response = await this.entityManager.executeQuery(query);
-    } catch (e) {
-      throw new Error(e);
-    }
+      const spChoiceFieldData = response.results[0];
 
-    const choices = response.results[0].Choices.results as string[];
+      cached = {
+        values: spChoiceFieldData.Choices.results,
+        editUri: spChoiceFieldData.__metadata.edit,
+        type: spChoiceFieldData.__metadata.type,
+        defaultValue: spChoiceFieldData.DefaultValue
+      };
 
-    this.spChoiceFieldCache[fieldName] = choices;
-    return choices;
+      this.spChoiceFieldCache[fieldName as any] = cached;
+
+      return [cached.defaultValue, cached.values] as SpChoiceResult;
+    })();
   }
 
   queryFromSp<TEntityName extends SharepointEntityList['shortname']>(

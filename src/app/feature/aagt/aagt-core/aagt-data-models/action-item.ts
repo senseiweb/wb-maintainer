@@ -1,5 +1,4 @@
 import { SharepointEntity, BzEntity, BzEntityProp } from 'app/core';
-import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 
 @BzEntity()
@@ -20,14 +19,12 @@ export class ActionItem extends SharepointEntity {
   @BzEntityProp('data')
   duration: number;
 
-  @BzEntityProp('data')
-  teamCategoryId: number;
-
-  @BzEntityProp('nav', {
-    relativeEntity: 'teamCategory',
-    navCfg: { isScalar: true }
+  @BzEntityProp('data', {
+    dataCfg: {
+      isNullable: false
+    }
   })
-  teamCategory: TeamCategory;
+  resourceCategory: string;
 
   @BzEntityProp('data', {})
   assignable: boolean;

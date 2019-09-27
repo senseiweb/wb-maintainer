@@ -16,9 +16,13 @@ import {
   IAppFormGroup
 } from './entity-extension';
 import { ValidatorFn, FormGroup } from '@angular/forms';
-import { SharepointEntity, BreezeEntity } from 'app/core';
+import {
+  SharepointEntity,
+  BreezeEntity,
+  EmServiceProviderConfig
+} from 'app/core';
 import { Omit } from './helper';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, BehaviorSubject } from 'rxjs';
 
 export type BzEntityType = Omit<
   EntityType,
@@ -80,8 +84,27 @@ declare module 'breeze-client/src/entity-query' {
   }
 }
 
+declare module 'breeze-client/src/data-service' {
+  export interface DataService {
+    odataAppEndpoint: string;
+    getRequestDigest(): Promise<string>;
+  }
+}
+
 declare module 'breeze-client/src/entity-manager' {
+  export interface SaveContext {
+    tempKeys: EntityKey[];
+    originalEntities: BreezeEntity[];
+    saveResult: SaveResult;
+  }
+
+  export interface SaveResult {
+    entitiesWithErrors: Entity[];
+  }
+
   export interface EntityManager {
+    isSaving: BehaviorSubject<boolean>;
+
     onModelChanges<
       TEntityList extends EntityList,
       TEntityName extends TEntityList['shortname']
@@ -146,7 +169,7 @@ declare module 'breeze-client/src/entity-metadata' {
 declare module 'breeze-client/src/entity-manager' {
   export interface SaveContext {
     tempKeys: EntityKey[];
-    originalEntities: Entity[];
+    originalEntities: BreezeEntity[];
     saveResult: SaveResult;
   }
 

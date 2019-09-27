@@ -85,8 +85,6 @@ export class AppInitializerService {
               id: currGrp.get_id()
             });
           }
-          console.table(myGroups);
-          console.log(props.get_userProfileProperties());
 
           SpConfig.cfgMy.next({
             profileProps: props.get_userProfileProperties(),

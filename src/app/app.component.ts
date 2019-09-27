@@ -19,14 +19,6 @@ export class AppComponent implements OnInit {
   title = 'warbird-maintainer';
   fuseConfig: any;
 
-  displayedColumns = [
-    'id',
-    'title',
-    'iso',
-    'status',
-    'genStart',
-    'assignedAssetCount'
-  ];
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private platform: Platform,

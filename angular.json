@@ -24,6 +24,8 @@
             "tsConfig": "src/tsconfig.app.json",
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
+              "src/styles.scss",
+              "src/assets/icons/material/material-icons.css",
               "node_modules/@syncfusion/ej2-base/styles/material.css",
               "node_modules/@syncfusion/ej2-buttons/styles/material.css",
               "node_modules/@syncfusion/ej2-calendars/styles/material.css",
@@ -39,9 +41,7 @@
               "node_modules/@syncfusion/ej2-icons/styles/material.css",
               "node_modules/@syncfusion/ej2-gantt/styles/material.css",
               "node_modules/@syncfusion/ej2-angular-gantt/styles/material.css",
-              "node_modules/sweetalert2/src/sweetalert2.scss",
-              "src/assets/icons/material/material-icons.css",
-              "src/styles.scss"
+              "node_modules/@syncfusion/ej2-angular-richtexteditor/styles/material.css"
             ],
             "scripts": [
               "src/app/core/data-access/breeze-providers/datajs-1.1.3.js"
@@ -50,12 +50,7 @@
           "configurations": {
             "development": {
               "baseHref": "/",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
-                }
-              ],
+              "fileReplacements": [],
               "optimization": false,
               "outputHashing": "all",
               "sourceMap": true,
@@ -66,11 +61,29 @@
               "vendorChunk": false,
               "buildOptimizer": false
             },
+            "spDevelopment": {
+              "baseHref": "/",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.sp-dev.ts"
+                }
+              ],
+              "optimization": false,
+              "outputHashing": "all",
+              "sourceMap": true,
+              "extractCss": true,
+              "namedChunks": true,
+              "aot": false,
+              "extractLicenses": true,
+              "vendorChunk": true,
+              "buildOptimizer": false
+            },
             "production": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "with": "src/environments/environment.sp-prod.ts"
                 }
               ],
               "optimization": true,

@@ -22,7 +22,7 @@ export const aagtNavStructure: FuseNavigation = {
   children: [
     {
       id: 'aagtGenList',
-      title: 'Geneartion List',
+      title: 'Generation Scheduler',
       type: 'item',
       icon: 'reciept',
       url: 'aagt/generations'
@@ -43,14 +43,14 @@ export const aagtNavStructure: FuseNavigation = {
           id: 'aagtGenMgrActionMgr',
           title: 'Action Item Manager',
           type: 'item',
-          url: 'aagt/gen-manager/action-management',
+          url: 'aagt/action-items',
           exactMatch: true
         },
         {
-          id: 'aagtGenMgrTeamMgr',
-          title: 'Team Manager',
+          id: 'aagtGenMgrResourceMgr',
+          title: 'Resource Manager',
           type: 'item',
-          url: 'aagt/gen-manager/team-management'
+          url: 'aagt/gen-manager/resource-management'
         }
       ]
     }

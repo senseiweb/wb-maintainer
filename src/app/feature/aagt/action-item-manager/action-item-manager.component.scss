@@ -1,0 +1,120 @@
+@import "src/@fuse/scss/fuse";
+
+app-action-items {
+  #actions {
+    .top-bg {
+      @include media-breakpoint("lt-md") {
+        height: 256px;
+      }
+    }
+
+    > .center {
+      > .header {
+        .search-wrapper {
+          width: 100%;
+          max-width: 480px;
+          border-radius: 28px;
+          overflow: hidden;
+          @include mat-elevation(1);
+
+          @include media-breakpoint("xs") {
+            width: 100%;
+          }
+
+          .search {
+            width: 100%;
+            height: 48px;
+            line-height: 48px;
+            padding: 0 18px;
+
+            input {
+              width: 100%;
+              height: 48px;
+              min-height: 48px;
+              max-height: 48px;
+              padding: 0 16px;
+              border: none;
+              outline: none;
+            }
+          }
+        }
+
+        @include media-breakpoint("lt-md") {
+          padding: 8px 0;
+          height: 192px !important;
+          min-height: 192px !important;
+          max-height: 192px !important;
+        }
+      }
+    }
+  }
+
+  .action {
+    cursor: pointer;
+  }
+
+  .action-items-table {
+    flex: 1 1 auto;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+
+    .mat-header-row {
+      min-height: 64px;
+    }
+
+    .action-items {
+      position: relative;
+      cursor: pointer;
+      height: 84px;
+    }
+
+    .mat-cell {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .mat-column-id {
+      flex: 0 1 94px;
+    }
+
+    .mat-column-shortCode {
+      flex: 0 1 200px;
+    }
+
+    .mat-column-action {
+      flex: 0 1 350px;
+    }
+
+    .mat-column-resourceCategory {
+      flex: 0 1 290px;
+    }
+
+    .mat-column-duration {
+      flex: 0 1 290px;
+    }
+
+    .mat-column-availability {
+      flex: 0 1 110px;
+    }
+
+    .availability {
+      display: inline-block;
+      vertical-align: middle;
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      margin-right: 8px;
+
+      & + span {
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+
+    .active-icon {
+      border-radius: 50%;
+    }
+  }
+}

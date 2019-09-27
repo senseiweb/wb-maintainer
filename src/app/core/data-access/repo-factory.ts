@@ -10,7 +10,7 @@ import {
 } from '@app_types';
 import { CoreSharepointRepo } from './core-sharepoint-repo';
 import { CoreRepo } from './core-repo';
-import { SharepointEntity, BreezeEntity } from '../data-models';
+import { HttpClient } from '@angular/common/http';
 
 export type RepoReturn<
   U extends GlobalEntityList['shortname'] | SharepointEntityList['shortname']
@@ -21,7 +21,10 @@ export type RepoReturn<
 export class RepoFactory<T extends EntityList> {
   static repoStore: { [index: string]: CoreRepo<any> } = {};
 
-  constructor(private em: EntityManager) {}
+  constructor(
+    public entityManager: EntityManager,
+    private httpClient: HttpClient
+  ) {}
 
   private initializedRepo(
     repoName: string,
@@ -31,9 +34,13 @@ export class RepoFactory<T extends EntityList> {
     const repoAlias = repoName.charAt(0).toUpperCase() + repoName.slice(1);
 
     if (!useSpRepo) {
-      newRepo = new CoreRepo(repoAlias as any, this.em);
+      newRepo = new CoreRepo(repoAlias as any, this.entityManager);
     } else {
-      newRepo = new CoreSharepointRepo(repoAlias as any, this.em);
+      newRepo = new CoreSharepointRepo(
+        repoAlias as any,
+        this.httpClient,
+        this.entityManager
+      );
     }
     RepoFactory.repoStore[repoName] = newRepo;
     return newRepo;

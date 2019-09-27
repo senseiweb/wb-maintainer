@@ -31,6 +31,7 @@ import {
 import { WeatherForcast } from 'app/feature/home';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Omit } from './helper';
+import { ActionItemResource } from 'app/feature/aagt/aagt-core/aagt-data-models/action-item-resource';
 
 export type CustomFormGroup = Omit<FormGroup, 'controls'>;
 
@@ -54,12 +55,12 @@ export type GenGraphData = TrigGrapData[];
 export type SharepointAagtEntityList =
   | Asset
   | ActionItem
+  | ActionItemResource
   | AssetTriggerAction
   | Generation
   | GenerationAsset
   | TeamAvailability
   | Team
-  | TeamCategory
   | TeamJobReservation
   | Trigger
   | TriggerAction;
@@ -215,14 +216,11 @@ export interface IEntityPropertyChange<
   entityAction: 'PropertyChange';
   propertyName: TProperty;
   entity: GetEntityType<TShortName>;
-  newValue: Pick<
-    GetEntityType<TShortName>,
-    TProperty & keyof GetEntityType<TShortName>
-  >;
-  oldValue: Pick<
-    GetEntityType<TShortName>,
-    TProperty & keyof GetEntityType<TShortName>
-  >;
+  newValue: GetEntityType<TShortName>[TProperty &
+    keyof GetEntityType<TShortName>];
+
+  oldValue: GetEntityType<TShortName>[TProperty &
+    keyof GetEntityType<TShortName>];
   parent: GetEntityType<TShortName>;
   property: DataType;
 }
@@ -261,7 +259,7 @@ export interface IEntityChangedEvent<
   TProperty extends GetEntityProp<TEntityName> = any
 > {
   shortName: TEntityName;
-  entityAction: TEntityAction;
+  entityActionName: TEntityAction;
   entity: GetEntityType<TEntityName>;
   args: SelectedEntityChangeArgs<TEntityName, TProperty, TEntityAction>;
 }
@@ -277,3 +275,16 @@ export type GlobalRepoManagerExtended<T extends EntityList> =
 //       : never
 //   };
 // }
+
+export interface IAtasGantt {
+  id: number;
+  name: string;
+  startDate: Date;
+  endDate?: Date;
+  triggerMilestone?: string;
+  duration?: number;
+  progress?: number;
+  predecessor?: number;
+  parentId?: number;
+  subtasks?: IAtasGantt[];
+}

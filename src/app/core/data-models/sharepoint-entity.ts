@@ -48,7 +48,9 @@ export abstract class SharepointEntity extends BreezeEntity {
     const em = this.entityAspect.entityManager;
     // creates and attaches itself to the current em;
     const props = {};
+    // Assigned this parent entity as one of the properties of the child;
     props[_l.camelCase(this.shortname)] = this;
+    // Need to fix the naming of the entityType. Breezejs expects PascalCase;
     childType = _l.upperFirst(childType) as any;
     Object.assign(props, defaultProps || {});
     const newEntity = em.createEntity(childType, props);

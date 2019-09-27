@@ -5,6 +5,7 @@ import {
   EmServiceProviderConfig,
   RepoFactory
 } from 'app/core';
+import { HttpClient } from '@angular/common/http';
 
 export function emProviderFactory() {
   const config = new EmServiceProviderConfig();
@@ -12,9 +13,9 @@ export function emProviderFactory() {
   config.serviceEndpoint = '';
   config.nameSpace = 'SP.Data.Home';
   // Home module is the top level module that will load global data modules.
-  return (emFactory: EmServiceProviderFactory) => {
+  return (emFactory: EmServiceProviderFactory, httpClient: HttpClient) => {
     const mgr = emFactory.createManager(config);
-    return new RepoFactory(mgr);
+    return new RepoFactory(mgr, httpClient);
   };
 }
 
@@ -26,7 +27,7 @@ export function emProviderFactory() {
     {
       provide: RepoFactory,
       useFactory: emProviderFactory(),
-      deps: [EmServiceProviderFactory]
+      deps: [EmServiceProviderFactory, HttpClient]
     }
   ]
 })

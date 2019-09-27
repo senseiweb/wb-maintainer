@@ -15,6 +15,10 @@ import {
   GenPlannerComponent
 } from './generation-planner';
 import { PlanTrigActionComponent } from './generation-planner/step-trig-action/step-trig-action.component';
+import { PlanSchedTaskComponent } from './generation-planner/step-schedule-task/step-sched-task.component';
+import { ActionItemManagerComponent } from './action-item-manager/action-item-manager.component';
+import { ActionItemResolverService } from './action-item-manager/action-item-manager-resolver.service';
+import { ActionItemDetailDialogComponent } from './action-item-manager';
 
 const routes: Routes = [
   {
@@ -41,14 +45,22 @@ const routes: Routes = [
     path: 'plan-generation/:id',
     component: GenPlannerComponent,
     resolve: { generation: PlanGenResolverService }
+  },
+  {
+    path: 'action-items',
+    component: ActionItemManagerComponent,
+    resolve: { resolvedData: ActionItemResolverService }
   }
 ];
 export const routedComponents = [
+  ActionItemManagerComponent,
+  ActionItemDetailDialogComponent,
   GenerationListComponent,
   GenerationListDetailComponent,
   GenPlannerComponent,
   PlanGenAssetComponent,
-  PlanTrigActionComponent
+  PlanTrigActionComponent,
+  PlanSchedTaskComponent
 ];
 
 @NgModule({

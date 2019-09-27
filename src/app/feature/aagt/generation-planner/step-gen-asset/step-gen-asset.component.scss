@@ -35,6 +35,11 @@
   font-size: 14px;
 }
 
+.inactive {
+  cursor: not-allowed;
+  background-color: #d0d0d0;
+}
+
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 4px;

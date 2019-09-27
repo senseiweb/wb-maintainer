@@ -2,130 +2,206 @@ import {
   Component,
   OnInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  ViewChild,
+  AfterViewInit,
+  Input
 } from '@angular/core';
 import { fuseAnimations } from '@fuse/animations';
-import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PlanGenResolvedData } from '../gen-planner-resolver.service';
 import {
   Generation,
   GenerationAsset,
   Asset,
-  GenStatusEnum
+  GenStatusEnum,
+  AssetTriggerAction,
+  Trigger,
+  AagtUowService,
+  IAtaData
 } from '../../aagt-core';
-import { RawEntity, AppFormGroup, IAppFormGroup } from '@app_types';
+import {
+  RawEntity,
+  AppFormGroup,
+  IAppFormGroup,
+  GenGraphData,
+  AssetTrigActGraph,
+  IAtasGantt
+} from '@app_types';
 import * as _m from 'moment';
 import * as _l from 'lodash';
 import Swal, { SweetAlertOptions } from 'sweetalert2';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FuseThemeOptionsModule } from '@fuse/components';
-
-type GenModelProps = Pick<
-  Generation,
-  'title' | 'assignedAssetCount' | 'iso' | 'genStartDate' | 'genStatus'
->;
-type GenFormModel = { [key in keyof GenModelProps]: FormControl };
+import { debounceTime } from 'rxjs/operators';
+import {
+  Gantt,
+  ITaskbarEditedEventArgs,
+  EditDialogFieldSettingsModel
+} from '@syncfusion/ej2-gantt';
+import {
+  ContextMenuClickEventArgs,
+  ContextMenuItemModel,
+  ColumnModel
+} from '@syncfusion/ej2-grids';
+import {
+  EditSettingsModel,
+  SelectionSettingsModel
+} from '@syncfusion/ej2-treegrid';
+import { ToolbarModel } from '@syncfusion/ej2-navigations';
+import { ActionBeginEventArgs } from '@syncfusion/ej2-dropdowns';
 
 @Component({
   selector: 'app-plan-sched-task',
   templateUrl: './step-sched-task.component.html',
   styleUrls: ['./step-sched-task.component.scss'],
-  animations: fuseAnimations,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: fuseAnimations
 })
 export class PlanSchedTaskComponent implements OnInit {
+  @ViewChild('taskSched', { static: false })
+  ganttChart: Gantt;
+
+  @Input() taskData: IAtaData;
   allIsos: string[];
   assignedAssets: GenerationAsset[];
   currentGen: Generation;
-  genFormGroup: IAppFormGroup<GenFormModel>;
+
+  contextMenuItems = [
+    'TaskInformation',
+    {
+      text: 'Delete Task',
+      target: '.e-content',
+      id: 'task-delete'
+    } as ContextMenuItemModel
+  ];
+
+  generationTasks: IAtasGantt[] = [];
   minDate = new Date();
   statusEnum = Object.keys(GenStatusEnum);
-  unassignedAssets: Asset[];
-
-  private formModelProps: Array<keyof GenModelProps> = [
-    'title',
-    'assignedAssetCount',
-    'iso',
-    'genStartDate',
-    'genStatus'
+  dayWorkTime = [{ from: 0, to: 24 }];
+  editSettings: EditSettingsModel = {
+    allowEditing: true,
+    allowDeleting: true
+  };
+  editDialogFields: EditDialogFieldSettingsModel[] = [
+    {
+      type: 'General',
+      headerText: 'Primary Data',
+      fields: ['name']
+    }
   ];
+  ganttColumns: ColumnModel[] = [
+    {
+      field: 'id',
+      headerText: 'ID',
+      width: '150',
+      visible: false,
+      isPrimaryKey: true
+    },
+    {
+      field: 'name',
+      headerText: 'Task Name',
+      width: '150',
+      clipMode: 'EllipsisWithTooltip'
+    },
+    {
+      field: 'triggerMilestone',
+      headerText: 'Assigned Trigger',
+      width: '150',
+      allowFiltering: true
+    },
+    { field: 'startDate' },
+    { field: 'duration' }
+  ];
+
+  selectionSettings: SelectionSettingsModel = {
+    mode: 'Row'
+  };
+  taskSettings = {
+    id: 'id',
+    name: 'name',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    duration: 'duration',
+    progress: 'progress',
+    dependency: 'predecessor',
+    child: 'subtasks'
+  };
+
+  timeLineSettings = {
+    timelineUnitSize: 33,
+    topTier: {
+      unit: 'Day',
+      format: 'dd-MMM-yyyy'
+    },
+    bottomTier: {
+      unit: 'Hour',
+      count: 1
+    }
+  };
+
+  triggerMarkers: Array<{ day: Date; label: string }> = [];
+  toolbarSettings: ['Edit', 'ZoomIn', 'ZoomOut', 'ZoomToFit'];
+
+  unassignedAssets: Asset[];
 
   constructor(
     private route: ActivatedRoute,
-    private formBuilder: FormBuilder,
-    private cdRef: ChangeDetectorRef
+    private uow: AagtUowService,
+    public schedTaskCompCdRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     const genRouteData = this.route.snapshot.data
       .generation as PlanGenResolvedData;
 
-    this.allIsos = genRouteData[3];
-
     this.currentGen = genRouteData[0];
 
-    this.unassignedAssets = _l.differenceWith(
-      genRouteData[1],
-      this.currentGen.generationAssets,
-      (a: Asset, b: GenerationAsset) => a.id === b.assetId
-    );
-    this.unassignedAssets = this.unassignedAssets.concat([
-      ...this.unassignedAssets
-    ]);
-    this.unassignedAssets = this.unassignedAssets.concat([
-      ...this.unassignedAssets
-    ]);
-    this.unassignedAssets = this.unassignedAssets.concat([
-      ...this.unassignedAssets
-    ]);
-    this.unassignedAssets = this.unassignedAssets.concat([
-      ...this.unassignedAssets
-    ]);
-
-    /**
-     * Make a copy of the generation assets because breeze js
-     * handles entity arrays differently from vanilla javascript
-     * array...which we do not want during add/remove operations
-     * because item position in the array matters.
-     */
-    this.assignedAssets = [...this.currentGen.generationAssets];
-
-    this.createFormGroupAndValidators();
+    this.setTriggerMarkers();
+    this.watchForModelChanges();
+    // this.createFormGroupAndValidators();
   }
 
   changeStep(): void {
     console.log('gen Asset step changed');
-    this.formModelProps.forEach(genProp => {
-      const formValue = this.genFormGroup.get(genProp).value;
-      const currProp = this.currentGen[genProp];
+    // this.formModelProps.forEach(genProp => {
+    //   const formValue = this.genFormGroup.get(genProp).value;
+    //   const currProp = this.currentGen[genProp];
 
-      if (currProp !== formValue) {
-        this.currentGen[genProp as any] = formValue;
-      }
-    });
+    //   if (currProp !== formValue) {
+    //     this.currentGen[genProp as any] = formValue;
+    //   }
+    // });
   }
 
-  createFormGroupAndValidators(): void {
-    const gen = this.currentGen;
-    const formModel: Partial<GenFormModel> = {};
+  createTriggerAction(): void {}
+  async contextMenuClick($event: ContextMenuClickEventArgs): Promise<void> {
+    console.log($event);
+    if ($event.item.id === 'task-delete') {
+      console.log('deleted item');
+      const config: SweetAlertOptions = {
+        title: 'Remove Task?',
+        text: `Are you sure?
+        This will permantely delete the selected tasks. `,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove asset!'
+      };
 
-    const formValidators = gen.entityType.custom.formValidators;
+      const result = await Swal.fire(config);
 
-    this.formModelProps.forEach(prop => {
-      formModel[prop] = new FormControl(
-        this.currentGen[prop],
-        formValidators && formValidators.propVal.get(prop)
-      );
-    });
-
-    this.genFormGroup = this.formBuilder.group(formModel) as any;
-
-    /** Disable the asset count as it is updated by the selection of assets */
-    formModel.assignedAssetCount.disable({
-      onlySelf: true,
-      emitEvent: false
-    });
+      if (result.value) {
+        this.ganttChart.editModule.deleteRecord(($event as any).rowData);
+        Swal.fire(
+          'Asset Removed',
+          'Asset and all tasks were removed',
+          'success'
+        );
+      }
+    }
   }
 
   dropOnGenAsset($event: CdkDragDrop<Asset, GenerationAsset>): void {
@@ -171,12 +247,12 @@ export class PlanSchedTaskComponent implements OnInit {
       }
     }
 
-    this.genFormGroup.controls.assignedAssetCount.setValue(
-      this.assignedAssets.length,
-      { onlySelf: true, emitEvent: false }
-    );
+    // this.genFormGroup.controls.assignedAssetCount.setValue(
+    //   this.assignedAssets.length,
+    //   { onlySelf: true, emitEvent: false }
+    // );
 
-    this.cdRef.markForCheck();
+    this.schedTaskCompCdRef.markForCheck();
   }
 
   async droppedOnAsset($event: CdkDragDrop<Asset>): Promise<void> {
@@ -221,5 +297,31 @@ export class PlanSchedTaskComponent implements OnInit {
     return result.value;
   }
 
+  setTriggerMarkers(): void {
+    this.triggerMarkers = this.currentGen.triggers.map(trigger => {
+      return { day: trigger.triggerStart, label: trigger.milestone };
+    });
+  }
+
   sortAssignedAsset(): void {}
+
+  taskEditSave($event: any): void {
+    if ($event.requestType === 'beforeSave') {
+      console.log('before save');
+      console.log($event);
+    } else {
+      console.log('all others');
+      console.log($event);
+    }
+  }
+
+  watchForModelChanges(): void {
+    this.uow.entityManager
+      .onModelChanges('trigger')
+      .pipe(debounceTime(1000))
+      .subscribe(_ => {
+        this.setTriggerMarkers();
+        this.schedTaskCompCdRef.markForCheck();
+      });
+  }
 }

@@ -6,6 +6,7 @@ import { CoreModule } from './core/core.module';
 import { AppInitializerService } from './core';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { HomeModule } from './feature/home/home.module';
+import { SharedModule } from './shared/shared.module';
 
 const initApp = (
   appInitializer: AppInitializerService,
@@ -14,7 +15,13 @@ const initApp = (
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [CoreModule, BrowserModule, HomeModule, AppRoutingModule],
+  imports: [
+    CoreModule,
+    BrowserModule,
+    SharedModule,
+    HomeModule,
+    AppRoutingModule
+  ],
   providers: [
     {
       provide: APP_INITIALIZER,

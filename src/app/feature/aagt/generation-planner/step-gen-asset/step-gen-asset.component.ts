@@ -61,7 +61,7 @@ export class PlanGenAssetComponent implements OnInit {
     const genRouteData = this.route.snapshot.data
       .generation as PlanGenResolvedData;
 
-    this.allIsos = genRouteData[3];
+    this.allIsos = genRouteData[3][1];
 
     this.currentGen = genRouteData[0];
 
@@ -188,7 +188,7 @@ export class PlanGenAssetComponent implements OnInit {
 
     const config: SweetAlertOptions = {
       title: 'Remove Asset?',
-      text: `Are you sure?
+      text: `Are you sure?\n
       This will delete all tasks assigned to this asset for this generation. `,
       type: 'warning',
       showCancelButton: true,
@@ -207,9 +207,9 @@ export class PlanGenAssetComponent implements OnInit {
 
       this.sortGenAsset();
 
-      genAsset.assetTriggerActions
-        .filter(ata => ata.generationAssetId === ata.id)
-        .forEach(ata => ata.entityAspect.setDeleted());
+      // genAsset.assetTriggerActions
+      //   .filter(ata => ata.generationAssetId === ata.id)
+      //   .forEach(ata => ata.entityAspect.setDeleted());
 
       genAsset.entityAspect.setDeleted();
 
@@ -222,4 +222,13 @@ export class PlanGenAssetComponent implements OnInit {
   }
 
   sortAssignedAsset(): void {}
+
+  updateGenData(): void {
+    for (const prop of this.formModelProps) {
+      if (this.currentGen[prop] !== this.genFormGroup.get(prop).value) {
+        this.currentGen[prop as any] = this.genFormGroup.get(prop).value;
+      }
+    }
+    this.genFormGroup.markAsPristine();
+  }
 }

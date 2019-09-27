@@ -1,0 +1,213 @@
+<div class="dialog-content-wrapper">
+  <mat-toolbar matDialogTitle class="mat-accent m-0">
+    <mat-toolbar-row fxLayout="row" fxLayoutAlign="space-between center">
+      <span class="title dialog-title">{{ dialogTitle }} </span>
+      <button
+        mat-icon-button
+        (click)="cancelChanges()"
+        [disabled]="isSaving | async"
+        aria-label="Close dialog"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+  <mat-progress-bar
+    *ngIf="isSaving | async"
+    [color]="isDeleting ? 'warn' : isEditing ? 'accent' : 'primary'"
+    mode="indeterminate"
+  ></mat-progress-bar>
+  <div mat-dialog-content class="p-24 pb-0 m-0" fusePerfectScrollbar>
+    <form [formGroup]="actionItemFormGroup">
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <mat-form-field appearance="outline" fxFlex="48">
+          <mat-label>Action Performed</mat-label>
+          <mat-icon matSuffix class="secondary-text"
+            >airplanemode_active</mat-icon
+          >
+          <input
+            name="action"
+            maxlength="25"
+            formControlName="action"
+            matInput
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline" fxFlex="48">
+          <mat-label>Action Short Code</mat-label>
+          <input
+            name="shortCode"
+            maxlength="10"
+            formControlName="shortCode"
+            matInput
+          />
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="start start">
+        <mat-form-field
+          appearance="outline"
+          fxFlex
+          *ngIf="categoryFormMode === 'select'"
+        >
+          <mat-label>Resource Category</mat-label>
+
+          <mat-select formControlName="resourceCategory">
+            <mat-option>Select/Create Category</mat-option>
+            <mat-option *ngFor="let cat of categories" [value]="cat">
+              {{ cat }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field fxFlex *ngIf="categoryFormMode !== 'select'">
+          <input matInput type="text" formControlName="addEditCategory" />
+          <mat-error
+            *ngIf="
+              actionItemFormGroup?.controls?.addEditCategory.hasError(
+                'dupResCatName'
+              )
+            "
+          >
+            Resource Category already exists
+          </mat-error>
+          <button
+            mat-button
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="cancelCategoryChanges()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          <button
+            mat-button
+            matSuffix
+            mat-icon-button
+            aria-label="Save"
+            [disabled]="isExistingCategory"
+            (click)="saveCategoryChanges()"
+          >
+            <mat-icon>check</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <button class="mt-8" mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="addCategory()">
+            <mat-icon>alarm_on</mat-icon>
+            <span>Add Category</span>
+          </button>
+          <button
+            mat-menu-item
+            [disabled]="!actionItemFormGroup?.controls?.resourceCategory.value"
+            (click)="editResourceCategory()"
+          >
+            <mat-icon>alarm_on</mat-icon>
+            <span>Edit Category</span>
+          </button>
+          <button
+            mat-menu-item
+            [disabled]="!actionItemFormGroup?.controls?.resourceCategory.value"
+            (click)="deleteResourceCategory()"
+          >
+            <mat-icon>alarm_on</mat-icon>
+            <span>Delete Category</span>
+          </button>
+        </mat-menu>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="space-between start">
+        <mat-form-field appearance="outline" fxFlex="48">
+          <mat-label>Assignable</mat-label>
+          <mat-select formControlName="assignable">
+            <mat-option [value]="true">Yes</mat-option>
+            <mat-option [value]="false">No</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" fxFlex="48">
+          <mat-label>Duration</mat-label>
+
+          <input
+            name="duration"
+            type="number"
+            placeholder="Length of Time"
+            formControlName="duration"
+            matInput
+          />
+          <span matSuffix>minutes</span>
+          <mat-hint align="end">{{ duration | minFormat }}</mat-hint>
+        </mat-form-field>
+      </div>
+      <div>
+        <ejs-richtexteditor id="defaultRTE" [height]="250" #aiRteObj>
+          <ng-template #aiNotesTemplate> </ng-template>
+        </ejs-richtexteditor>
+      </div>
+    </form>
+  </div>
+
+  <div
+    mat-dialog-actions
+    class="m-0 p-16"
+    fxLayout="row"
+    fxLayoutAlign="end center"
+  >
+    <button
+      mat-button
+      [disabled]="isSaving | async"
+      class="mr-8"
+      (click)="cancelChanges()"
+      color="accent"
+      aria-label="CANCEL"
+      matTooltip="Cancel Changes"
+    >
+      CANCEL
+    </button>
+    <button
+      *ngIf="formMode === 'edit'"
+      [disabled]="isSaving | async"
+      mat-button
+      class="mr-8"
+      color="warn"
+      (click)="deleteItem()"
+      aria-label="Delete"
+      matTooltip="Delete"
+    >
+      DELETE
+    </button>
+
+    <button
+      *ngIf="formMode !== 'edit'"
+      mat-button
+      mat-raised-button
+      class="save-button"
+      color="primary"
+      (click)="saveChanges()"
+      [disabled]="
+        actionItemFormGroup.pristine ||
+        actionItemFormGroup.invalid ||
+        (isSaving | async)
+      "
+      aria-label="SAVE"
+    >
+      ADD
+    </button>
+
+    <button
+      *ngIf="formMode === 'edit'"
+      mat-raised-button
+      class="save-button"
+      color="primary"
+      (click)="saveChanges()"
+      [disabled]="
+        actionItemFormGroup.pristine ||
+        actionItemFormGroup.invalid ||
+        (isSaving | async)
+      "
+      aria-label="SAVE"
+    >
+      UPDATE
+    </button>
+  </div>
+</div>

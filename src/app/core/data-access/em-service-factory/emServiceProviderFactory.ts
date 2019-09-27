@@ -3,7 +3,8 @@ import {
   DataService,
   NamingConvention,
   MetadataStore,
-  EntityAction
+  EntityAction,
+  SaveResult
 } from 'breeze-client';
 import '../breeze-providers/sharepoint-dataservice';
 import { EmServiceProviderConfig } from './emServiceProviderConfig.service';
@@ -18,9 +19,15 @@ import {
   IEntityChangedEvent,
   IEntityPropertyChange
 } from '@app_types';
-import { Observable, Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import * as debounce from 'debounce-promise';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { filter, tap } from 'rxjs/operators';
 import { SharepointMetadata, BreezeEntity } from 'app/core/data-models';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
+import * as _m from 'moment';
+import * as _l from 'lodash';
+import { chartScrollElement } from '@syncfusion/ej2-gantt/src/gantt/base/css-constants';
+import { Save } from '@syncfusion/ej2-file-utils';
 
 // List of models that are used across feature setsl
 const GlobalModel = [SharepointMetadata];
@@ -30,7 +37,14 @@ export class EmServiceProviderFactory {
   private metaStore: MetadataStore;
   private repoStore = {};
 
-  constructor(private nameDictService: CustomNameConventionService) {
+  private saveDebounce: (
+    entityBundler: [BreezeEntity][]
+  ) => Promise<SaveResult>;
+
+  constructor(
+    private nameDictService: CustomNameConventionService,
+    private http: HttpClient
+  ) {
     this.initEmServiceProvider();
   }
 
@@ -65,6 +79,9 @@ export class EmServiceProviderFactory {
       adapterName: mgrCfg.adapterName
     });
 
+    dataService.getRequestDigest = this.getRequestDigest(mgrCfg);
+    dataService.odataAppEndpoint = mgrCfg.odataAppEndPoint;
+
     const em = new EntityManager({
       dataService,
       metadataStore: this.metaStore
@@ -79,9 +96,61 @@ export class EmServiceProviderFactory {
         mgrCfg.nameSpace
       );
     });
-
+    em.isSaving = new BehaviorSubject(false);
     em.onModelChanges = this.watchModelChanges(em);
     return em;
+  }
+
+  // debounceSave(
+  //   em: EntityManager
+  // ): (entity: BreezeEntity) => Promise<SaveResult> {
+  //   const saveDebounce = debounce(
+  //     (contexts: [BreezeEntity][]) => {
+  //       const entitiesToSave = _l.flatMap(contexts, x => x.map(c => c));
+  //       return em.saveChanges(entitiesToSave as any[]);
+  //     },
+  //     1500,
+  //     { accumulate: true }
+  //   );
+  //   return entity => saveDebounce(entity as any);
+  // }
+
+  getRequestDigest(mgrCfg: EmServiceProviderConfig): () => Promise<string> {
+    let tokenExpireTime = _m();
+    let digestToken = '';
+    let tokenPromise: Promise<string>;
+
+    return () => {
+      const isExpired = _m().diff(tokenExpireTime, 'minute') > 5;
+
+      if (digestToken && !isExpired) {
+        return Promise.resolve(digestToken);
+      }
+
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json;odata=minimalmetadata',
+        Accept: 'application/json;odata=verbose'
+      });
+
+      if (tokenPromise) {
+        return tokenPromise;
+      }
+
+      tokenPromise = this.http
+        .post(mgrCfg.ctxEndpoint, undefined, { headers })
+        .toPromise()
+        .then(ctxResponse => {
+          digestToken = (ctxResponse as any).d.GetContextWebInformation
+            .FormDigestValue;
+          const timeoutSeconds = (ctxResponse as any).d.GetContextWebInformation
+            .FormDigestTimeoutSeconds;
+
+          tokenExpireTime = _m().add(timeoutSeconds, 'second');
+          tokenPromise = undefined;
+          return digestToken;
+        });
+      return tokenPromise;
+    };
   }
 
   private watchModelChanges(em: EntityManager): any {
@@ -91,10 +160,10 @@ export class EmServiceProviderFactory {
 
       switch (changedArgs.entityAction as EntityAction) {
         case EntityAction.PropertyChange:
-          changedArgs.entityAction = 'PropertyChange';
+          changedArgs.entityActionName = 'PropertyChange';
           break;
         case EntityAction.EntityStateChange:
-          changedArgs.entityAction = 'EntityState';
+          changedArgs.entityActionName = 'EntityState';
           break;
       }
 
@@ -130,45 +199,26 @@ export class EmServiceProviderFactory {
               TEntityAction,
               any
             >
-          ) => shortNameArrayed.includes(chngArgs.shortName)
+          ) => {
+            if (!shortNameArrayed.includes(chngArgs.shortName)) {
+              return false;
+            }
+
+            if (etAction && chngArgs.entityActionName !== etAction) {
+              return false;
+            }
+
+            if (
+              property &&
+              !propertyArrayed.includes((chngArgs.args as any).propertyName)
+            ) {
+              return false;
+            }
+
+            return true;
+          }
         )
       );
-
-      if (etAction) {
-        ecObserverable.pipe(
-          filter(
-            (
-              chngArgs: IEntityChangedEvent<
-                TEntityList,
-                TEntityName,
-                TEntityAction,
-                TEntityProp
-              >
-            ) => chngArgs.entityAction === etAction
-          )
-        );
-      }
-
-      if (property) {
-        ecObserverable.pipe(
-          filter(
-            (
-              chngArgs: IEntityChangedEvent<
-                TEntityList,
-                TEntityName,
-                TEntityAction,
-                TEntityProp
-              >
-            ) =>
-              propertyArrayed.includes(
-                (chngArgs.args as IEntityPropertyChange<
-                  TEntityName,
-                  TEntityProp
-                >).propertyName
-              )
-          )
-        );
-      }
 
       return ecObserverable;
     };

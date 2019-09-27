@@ -8,10 +8,15 @@ import {
   ActionItem,
   Asset
 } from '../aagt-core';
-import { RepoFactory } from 'app/core';
+import { RepoFactory, SpChoiceResult } from 'app/core';
 import { SharepointAagtEntityList } from '@app_types';
 
-export type PlanGenResolvedData = [Generation, Asset[], ActionItem[], string[]];
+export type PlanGenResolvedData = [
+  Generation,
+  Asset[],
+  ActionItem[],
+  SpChoiceResult
+];
 
 @Injectable({ providedIn: AagtCoreModule })
 export class PlanGenResolverService implements Resolve<PlanGenResolvedData> {

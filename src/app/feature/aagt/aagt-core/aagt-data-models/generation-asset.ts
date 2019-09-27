@@ -2,6 +2,7 @@ import { SharepointEntity, BzEntity, BzEntityProp } from 'app/core';
 import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Generation } from './generation';
+import * as _l from 'lodash';
 
 export type AssetStatus = 'FMC' | 'PMC' | 'NMC' | 'UNSET';
 
@@ -62,4 +63,6 @@ export class GenerationAsset extends SharepointEntity {
     relativeEntity: 'assetTriggerAction'
   })
   assetTriggerActions: AssetTriggerAction[];
+
+  protected initializer(entity: this) {}
 }
