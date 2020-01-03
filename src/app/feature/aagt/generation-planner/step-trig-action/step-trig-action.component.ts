@@ -4,16 +4,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   OnDestroy
-} from '@angular/core';
-import { fuseAnimations } from '@fuse/animations';
+} from "@angular/core";
+import { fuseAnimations } from "@fuse/animations";
 import {
   FormGroup,
   FormControl,
   FormBuilder,
   FormGroupDirective
-} from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { PlanGenResolvedData } from '../gen-planner-resolver.service';
+} from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
+import { PlanGenResolvedData } from "../gen-planner-resolver.service";
 import {
   Generation,
   Asset,
@@ -21,27 +21,27 @@ import {
   ActionItem,
   Trigger,
   AagtUowService
-} from '../../aagt-core';
-import { RawEntity, IAppFormGroup } from '@app_types';
-import * as _m from 'moment';
-import * as _l from 'lodash';
-import Swal, { SweetAlertOptions } from 'sweetalert2';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ErrorStateMatcher } from '@angular/material';
-import { BreezeEntity } from 'app/core';
+} from "../../aagt-core";
+import { RawEntity, IAppFormGroup } from "@app_types";
+import * as _m from "moment";
+import * as _l from "lodash";
+import Swal, { SweetAlertOptions } from "sweetalert2";
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { ErrorStateMatcher } from "@angular/material";
+import { BreezeEntity } from "app/core";
 
 type TrigModelProps =
-  | keyof Pick<Trigger, 'milestone' | 'triggerStart'>
-  | 'triggerSelection';
+  | keyof Pick<Trigger, "milestone" | "triggerStart">
+  | "triggerSelection";
 
 type TrigFormModel = { [key in TrigModelProps]: FormControl };
 
 @Component({
-  selector: 'app-plan-trig-action',
-  templateUrl: './step-trig-action.component.html',
-  styleUrls: ['./step-trig-action.component.scss'],
+  selector: "app-plan-trig-action",
+  templateUrl: "./step-trig-action.component.html",
+  styleUrls: ["./step-trig-action.component.scss"],
   animations: fuseAnimations,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -61,9 +61,9 @@ export class PlanTrigActionComponent
   unsubscribeAll: Subject<any>;
 
   private formModelProps: TrigModelProps[] = [
-    'milestone',
-    'triggerStart',
-    'triggerSelection'
+    "milestone",
+    "triggerStart",
+    "triggerSelection"
   ];
 
   constructor(
@@ -110,7 +110,7 @@ export class PlanTrigActionComponent
       return;
     }
 
-    const newTrigger = this.currentGen.createChild('trigger');
+    const newTrigger = this.currentGen.createChild("trigger");
 
     if (fgControls.triggerSelection.disabled) {
       fgControls.triggerSelection.enable({ onlySelf: true, emitEvent: false });
@@ -152,14 +152,14 @@ export class PlanTrigActionComponent
     const formModel: Partial<TrigFormModel> = {};
 
     this.formModelProps.forEach(prop => {
-      const defaultProp = trigger ? trigger[prop] : '';
-      formModel[prop] = new FormControl(defaultProp, { updateOn: 'blur' });
+      const defaultProp = trigger ? trigger[prop] : "";
+      formModel[prop] = new FormControl(defaultProp, { updateOn: "blur" });
     });
 
     this.trigFormGroup = this.formBuilder.group(formModel) as any;
 
     this.currentGen
-      .getRelatedEntityType('trigger')
+      .getRelatedEntityType("trigger")
       .custom.setFormValidators(this.trigFormGroup, trigger);
 
     /**
@@ -169,7 +169,7 @@ export class PlanTrigActionComponent
     this.watchFormModel();
 
     if (!this.currentTrigger) {
-      formModel.triggerSelection.setValue('new');
+      formModel.triggerSelection.setValue("new");
       formModel.triggerSelection.disable({ onlySelf: true, emitEvent: false });
     }
   }
@@ -181,9 +181,9 @@ export class PlanTrigActionComponent
 
     if (milestoneExists) {
       Swal.fire(
-        'Duplicate Milestone',
+        "Duplicate Milestone",
         `${milestone} already exists for this generation`,
-        'error'
+        "error"
       );
     }
 
@@ -192,14 +192,14 @@ export class PlanTrigActionComponent
 
   async deleteTrigger(): Promise<void> {
     const config: SweetAlertOptions = {
-      title: 'Remove Trigger?',
+      title: "Remove Trigger?",
       text: `Are you sure?
       This will delete all actions and tasks assigned to this trigger. `,
-      type: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete trigger!'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete trigger!"
     };
 
     const result = await Swal.fire(config);
@@ -224,7 +224,7 @@ export class PlanTrigActionComponent
 
       if (!this.triggerList.length) {
         this.trigFormGroup.reset({
-          triggerSelection: 'new'
+          triggerSelection: "new"
         });
 
         fgControls.triggerSelection.disable({ emitEvent: false });
@@ -234,9 +234,9 @@ export class PlanTrigActionComponent
       }
 
       Swal.fire(
-        'Trigger Remove',
-        'Trigger, all action items, and all tasks were removed',
-        'success'
+        "Trigger Remove",
+        "Trigger, all action items, and all tasks were removed",
+        "success"
       );
     }
   }
@@ -249,14 +249,14 @@ export class PlanTrigActionComponent
     const trigAction = $event.item.data as TriggerAction;
 
     const config: SweetAlertOptions = {
-      title: 'Remove Action Item?',
+      title: "Remove Action Item?",
       text: `Are you sure?
       This will delete all tasks assigned to this action item for this trigger. `,
-      type: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, remove asset!'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, remove asset!"
     };
 
     const result = await Swal.fire(config);
@@ -276,9 +276,9 @@ export class PlanTrigActionComponent
       trigAction.entityAspect.setDeleted();
 
       Swal.fire(
-        'Action Item Removed',
-        'Action Item and all tasks were removed',
-        'success'
+        "Action Item Removed",
+        "Action Item and all tasks were removed",
+        "success"
       );
     }
   }
@@ -303,7 +303,7 @@ export class PlanTrigActionComponent
       return;
     }
 
-    const addedTrigAction = this.currentTrigger.createChild('triggerAction', {
+    const addedTrigAction = this.currentTrigger.createChild("triggerAction", {
       actionItemId: actionItem.id,
       generation: this.currentGen
     });
@@ -368,7 +368,7 @@ export class PlanTrigActionComponent
 
   updateTrigger(): void {
     const fgControls = this.trigFormGroup.controls;
-    const currentMilestone = this.currentTrigger.milestone || '';
+    const currentMilestone = this.currentTrigger.milestone || "";
 
     if (
       fgControls.milestone.dirty &&
@@ -394,7 +394,7 @@ export class PlanTrigActionComponent
 
   watchModelForChanges(): void {
     this.uow.entityManager
-      .onModelChanges('generation', 'PropertyChange', 'genStartDate')
+      .onModelChanges("generation", "PropertyChange", "genStartDate")
       .pipe(takeUntil(this.unsubscribeAll))
       .subscribe(_ => this.setMinDate());
   }
@@ -409,18 +409,18 @@ export class PlanTrigActionComponent
 
     fgControls.triggerSelection.valueChanges
       .pipe(takeUntil(this.unsubscribeAll))
-      .subscribe((trigger: Trigger | 'new') => {
+      .subscribe((trigger: Trigger | "new") => {
         /**
          * If the selection is for a 'new' trigger,
          * setup a shell object that for the form values.
          * Makes it easier to track if user decides that didn't
          * really mean to create a new trigger.
          */
-        if (trigger === 'new') {
+        if (trigger === "new") {
           fgControls.milestone.reset();
           fgControls.triggerStart.reset();
 
-          fgControls.milestone.setValue('', {
+          fgControls.milestone.setValue("", {
             emitEvent: false
           });
 

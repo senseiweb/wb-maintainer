@@ -115,6 +115,59 @@ export class AagtUowService {
     return (newEntity as any) as SelectedEntityKind<T>;
   }
 
+  flattenTriggerAction(generation: Generation): any[]  {
+
+    const triggers = _l.sortBy(generation.triggers, x => x.triggerStart);
+    // const taskList: Array<TriggerAction & {stop?: Date}> = [] as any;
+    let ganttData = [];
+
+    for (const trigger of triggers) {
+      let idx = 0;
+
+      const trigActs = _l.sortBy(trigger.triggerActions, x => x.sequence);
+      const triggerGanttData = [];
+
+      for (const trigAct of trigActs) {
+        let start: Date;
+        let stop: Date;
+        let predId: number;
+
+        if (idx === 0) {
+          start = _m(trigAct.trigger.triggerStart).toDate();
+          stop =  _m(start).add(trigAct.actionItem.duration, 'm').add(30, 'm').toDate();
+        } else {
+          const previousGanttTask = triggerGanttData[idx -1];
+          predId = previousGanttTask.id;
+          start = _m(previousGanttTask.endDate).add(30, 'm').toDate();
+          stop = _m(start).add(trigAct.actionItem.duration).toDate();
+        }
+
+        // taskList.push(trigAct);]
+        const tId = Math.abs(trigger.id) + '' + trigAct.sequence;
+
+        const gd = {
+          id: +tId,
+          startDate: start,
+          endDate: stop,
+          name: trigAct.actionItem.action,
+          triggerMilestone: trigAct.trigger.milestone,
+          taskId: trigAct.id,
+          triggerAction: trigAct,
+          duration: trigAct.actionItem.duration,
+          predecessor: predId
+        };
+
+        triggerGanttData.push(gd);
+
+        idx++;
+      }
+
+      ganttData = ganttData.concat(triggerGanttData);
+    }
+
+    return ganttData;
+  }
+
   flattenGenerationTask(generation: Generation): IAtaData {
     const genAssets = _l.sortBy(generation.generationAssets, x => x.mxPosition);
     const taskData = {} as IAtaData;

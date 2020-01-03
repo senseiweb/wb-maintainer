@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import { ActionItemDetailDialogComponent } from './action-item-manager';
 import { FuseMaterialColorPickerModule } from '@fuse/components';
 import { MatDialogModule } from '@angular/material';
+import { GridAllModule } from '@syncfusion/ej2-angular-grids';
 
 @NgModule({
   imports: [
@@ -12,7 +13,8 @@ import { MatDialogModule } from '@angular/material';
     AagtCoreModule,
     SharedModule,
     FuseMaterialColorPickerModule,
-    MatDialogModule
+    MatDialogModule,
+    GridAllModule
   ],
   declarations: routedComponents,
   entryComponents: [ActionItemDetailDialogComponent],

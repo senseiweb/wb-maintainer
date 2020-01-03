@@ -5,44 +5,102 @@
   fxLayoutAlign="space-between stretch"
   fxFlex="100"
 >
-  <div style="display: block" class="control-section">
-    <ejs-gantt
-      #taskSched
-      id="taskSched"
-      height="600px"
-      [allowFiltering]="true"
-      [dataSource]="generationTasks"
-      [includeWeekend]="true"
-      [dateFormat]="'dd-MMM HHmm'"
-      [columns]="ganttColumns"
-      [durationUnit]="'minute'"
-      [highlightWeekends]="true"
-      [timelineSettings]="timeLineSettings"
-      [taskFields]="taskSettings"
-      [toolbar]="toolbarSettings"
-      [editSettings]="editSettings"
-      [selectionSettings]="selectionSettings"
-      [editDialogFields]="editDialogFields"
-      [eventMarkers]="triggerMarkers"
-      [projectStartDate]="currentGen.genStartDate"
-      [projectEndDate]="currentGen.genEndDate"
-      [dayWorkingTime]="dayWorkTime"
-      [enableContextMenu]="true"
-      [contextMenuItems]="contextMenuItems"
-      [gridLines]="'Both'"
-      (contextMenuClick)="contextMenuClick($event)"
-      (actionBegin)="taskEditSave($event)"
-      (actionComplete)="taskEditSave($event)"
+  <div style="display: block;" class="control-section">
+    <ejs-grid
+      fusePerfectScrollbar
+      (actionBegin)="actionHandler($event)"
+      #ataGrid
+      height="600"
+      [dataSource]="data"
+      [allowGrouping]="true"
+      [groupSettings]="groupSettings"
+      [selectionSettings]="selectionOptions"
+      [toolbar]="toolbar"
+      (load)="load()"
+      (dataBound)="dataBound()"
+      (toolbarClick)="toolbarClickHandler($event)"
     >
-      <e-edit-dialog-fields>
-        <e-edit-dialog-field type="General" headerText="General"
-          ><p>Hello World</p></e-edit-dialog-field
-        >
-        <e-edit-dialog-field
-          type="Dependency"
-          headerText="Dependency"
-        ></e-edit-dialog-field>
-      </e-edit-dialog-fields>
-    </ejs-gantt>
+      <e-columns>
+        <e-column
+          field="taskEntityStatus"
+          headerText="Status Entity"
+          width="45"
+        ></e-column>
+        <e-column
+          field="id"
+          headerText="Task ID"
+          width="20"
+          isPrimaryKey="true"
+        ></e-column>
+        <e-column
+          field="sequence"
+          headerText="Task Sequence"
+          width="30"
+        ></e-column>
+        <e-column
+          field="taskAsset"
+          headerText="Assigned Asset"
+          width="60"
+        ></e-column>
+        <e-column
+          field="taskTrigger"
+          headerText="Assigned Trigger"
+          width="60"
+        ></e-column>
+        <e-column field="taskName" headerText="Task Name" width="60"></e-column>
+        <e-column
+          field="taskFormattedDuration"
+          headerText="Task Duration"
+          width="60"
+        ></e-column>
+        <e-column
+          field="actionStatus"
+          headerText="Task Status"
+          width="60"
+        ></e-column>
+        <e-column
+          field="outcome"
+          headerText="Task Outcome"
+          width="60"
+        ></e-column>
+        <!-- <e-column
+          field="taskName"
+          headerText="Task Name"
+          width="130"
+          format="yMd"ta
+          editType="datepickeredit"
+          textAlign="Right"
+        ></e-column> -->
+      </e-columns>
+      <!-- <e-aggregates>
+        <e-aggregate>
+          <e-columns>
+            <e-column type="Sum" field="Freight" format="C2">
+              <ng-template #footerTemplate let-data
+                >Sum: {{ data.Sum }}</ng-template
+              >
+            </e-column>
+          </e-columns>
+        </e-aggregate>
+        <e-aggregate>
+          <e-columns>
+            <e-column type="Sum" field="Freight" format="C2">
+              <ng-template #groupFooterTemplate let-data
+                >Sum: {{ data.Sum }}</ng-template
+              >
+            </e-column>
+          </e-columns>
+        </e-aggregate>
+        <e-aggregate>
+          <e-columns>
+            <e-column type="Average" field="Freight" format="C2">
+              <ng-template #groupCaptionTemplate let-data
+                >Average: {{ data.Average }}</ng-template
+              >
+            </e-column>
+          </e-columns>
+        </e-aggregate>
+      </e-aggregates> -->
+    </ejs-grid>
   </div>
 </div>

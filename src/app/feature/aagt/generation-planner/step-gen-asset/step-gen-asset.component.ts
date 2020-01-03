@@ -3,34 +3,34 @@ import {
   OnInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef
-} from '@angular/core';
-import { fuseAnimations } from '@fuse/animations';
-import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { PlanGenResolvedData } from '../gen-planner-resolver.service';
+} from "@angular/core";
+import { fuseAnimations } from "@fuse/animations";
+import { FormGroup, FormControl, FormBuilder } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
+import { PlanGenResolvedData } from "../gen-planner-resolver.service";
 import {
   Generation,
   GenerationAsset,
   Asset,
   GenStatusEnum
-} from '../../aagt-core';
-import { RawEntity, AppFormGroup, IAppFormGroup } from '@app_types';
-import * as _m from 'moment';
-import * as _l from 'lodash';
-import Swal, { SweetAlertOptions } from 'sweetalert2';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { FuseThemeOptionsModule } from '@fuse/components';
+} from "../../aagt-core";
+import { RawEntity, AppFormGroup, IAppFormGroup } from "@app_types";
+import * as _m from "moment";
+import * as _l from "lodash";
+import Swal, { SweetAlertOptions } from "sweetalert2";
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
+import { FuseThemeOptionsModule } from "@fuse/components";
 
 type GenModelProps = Pick<
   Generation,
-  'title' | 'assignedAssetCount' | 'iso' | 'genStartDate' | 'genStatus'
+  "title" | "assignedAssetCount" | "iso" | "genStartDate" | "genStatus"
 >;
 type GenFormModel = { [key in keyof GenModelProps]: FormControl };
 
 @Component({
-  selector: 'app-plan-gen-asset',
-  templateUrl: './step-gen-asset.component.html',
-  styleUrls: ['./step-gen-asset.component.scss'],
+  selector: "app-plan-gen-asset",
+  templateUrl: "./step-gen-asset.component.html",
+  styleUrls: ["./step-gen-asset.component.scss"],
   animations: fuseAnimations,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -44,11 +44,11 @@ export class PlanGenAssetComponent implements OnInit {
   unassignedAssets: Asset[];
 
   private formModelProps: Array<keyof GenModelProps> = [
-    'title',
-    'assignedAssetCount',
-    'iso',
-    'genStartDate',
-    'genStatus'
+    "title",
+    "assignedAssetCount",
+    "iso",
+    "genStartDate",
+    "genStatus"
   ];
 
   constructor(
@@ -95,7 +95,7 @@ export class PlanGenAssetComponent implements OnInit {
   }
 
   changeStep(): void {
-    console.log('gen Asset step changed');
+    console.log("gen Asset step changed");
     this.formModelProps.forEach(genProp => {
       const formValue = this.genFormGroup.get(genProp).value;
       const currProp = this.currentGen[genProp];
@@ -148,7 +148,7 @@ export class PlanGenAssetComponent implements OnInit {
       return;
     }
 
-    const addedGenAsset = this.currentGen.createChild('generationAsset', {
+    const addedGenAsset = this.currentGen.createChild("generationAsset", {
       assetId: asset.id
     });
 
@@ -187,14 +187,14 @@ export class PlanGenAssetComponent implements OnInit {
     const genAsset = $event.item.data as GenerationAsset;
 
     const config: SweetAlertOptions = {
-      title: 'Remove Asset?',
+      title: "Remove Asset?",
       text: `Are you sure?\n
       This will delete all tasks assigned to this asset for this generation. `,
-      type: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, remove asset!'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, remove asset!"
     };
 
     const result = await Swal.fire(config);
@@ -213,7 +213,7 @@ export class PlanGenAssetComponent implements OnInit {
 
       genAsset.entityAspect.setDeleted();
 
-      Swal.fire('Asset Removed', 'Asset and all tasks were removed', 'success');
+      Swal.fire("Asset Removed", "Asset and all tasks were removed", "success");
     }
 
     console.log(result);

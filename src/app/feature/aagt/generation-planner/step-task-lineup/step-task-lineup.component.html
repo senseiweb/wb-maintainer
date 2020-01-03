@@ -1,0 +1,38 @@
+<div
+  id="step-task-lineUp"
+  [@animate]="{ value: '*', params: { y: '100%' } }"
+  fxLayout="row"
+  fxLayoutAlign="space-between stretch"
+  fxFlex="100"
+>
+  <div class="control-section" style="display: block">
+    <ejs-gantt
+      #taskLineUp
+      id="taskLineUp"
+      [dataSource]="taskLineupGanttTasks"
+      height="600px"
+      [taskFields]="taskSettings"
+      [dateFormat]="'dd-MMM HHmm'"
+      [editDialogFields]="editDialogFields"
+      [labelSettings]="labelSettings"
+      [columns]="ganttColumns"
+      [toolbar]="toolbarSettings"
+      [timelineSettings]="timeLineSettings"
+      [highlightWeekends]="true"
+      [treeColumnIndex]="1"
+      [editSettings]="editSettings"
+      (actionComplete)="actionComplete($event)"
+      [gridLines]="'Both'"
+      [includeWeekend]="true"
+      [durationUnit]="'minute'"
+      [treeColumnIndex]="1"
+      [rowHeight]="75"
+      [taskbarHeight]="65"
+      [selectionSettings]="selectionSettings"
+      [projectStartDate]="currentGen.genStartDate"
+      [eventMarkers]="triggerMarkers"
+      [projectEndDate]="currentGen.genEndDate"
+    >
+    </ejs-gantt>
+  </div>
+</div>

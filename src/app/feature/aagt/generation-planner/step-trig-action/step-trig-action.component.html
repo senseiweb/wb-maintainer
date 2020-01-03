@@ -108,7 +108,7 @@
         <div
           cdkDropList
           [cdkDropListDisabled]="trigFormGroup.invalid || trigFormGroup.dirty"
-          fusePrefectScroll
+          fusePerfectScrollbar
           #unassignedActionItemList="cdkDropList"
           [cdkDropListData]="unassignedActions"
           cdkDropListSortingDisabled
@@ -149,7 +149,7 @@
         <div
           cdkDropList
           [cdkDropListDisabled]="trigFormGroup.invalid || trigFormGroup.dirty"
-          fusePrefectScroll
+          fusePerfectScrollbar
           #assignedTrigActionList="cdkDropList"
           [cdkDropListData]="assignedTrigActions"
           [cdkDropListConnectedTo]="[unassignedActionItemList]"

@@ -3,7 +3,8 @@ import {
   OnInit,
   ViewChild,
   OnDestroy,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  ChangeDetectorRef
 } from '@angular/core';
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { PlanGenAssetComponent } from './step-gen-asset';
@@ -22,11 +23,11 @@ import { takeUntil, debounceTime } from 'rxjs/operators';
 import { PlanGenResolvedData } from './gen-planner-resolver.service';
 import { PlanSchedTaskComponent } from './step-schedule-task/step-sched-task.component';
 import { IEntityPropertyChange, IEntityChangedEvent } from '@app_types';
+import { PlanTaskLineUpComponent } from './step-task-lineup/step-task-lineup.component';
 
 @Component({
   templateUrl: './gen-planner.component.html',
-  styleUrls: ['./gen-planner.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./gen-planner.component.scss']
 })
 export class GenPlannerComponent implements OnInit, OnDestroy {
   private debouncedReplan = _l.debounce(this.replanTasks, 2500);
@@ -36,6 +37,9 @@ export class GenPlannerComponent implements OnInit, OnDestroy {
 
   @ViewChild(PlanSchedTaskComponent, { static: false })
   private schedTaskComponent: PlanSchedTaskComponent;
+
+  @ViewChild(PlanTaskLineUpComponent, { static: false })
+  private taskLineupComponent: PlanTaskLineUpComponent;
 
   private unsubscribe: Subject<any>;
   private modelWatcherId: string;
@@ -49,47 +53,9 @@ export class GenPlannerComponent implements OnInit, OnDestroy {
     const genRouteData = this.route.snapshot.data
       .generation as PlanGenResolvedData;
     this.generation = genRouteData[0];
-    this.uow.entityManager
-      .onModelChanges('triggerAction', 'PropertyChange', 'sequence')
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe(chngArgs => {
-        const trigAct = chngArgs.entity;
-        const args = (chngArgs as IEntityChangedEvent<
-          any,
-          'triggerAction',
-          'PropertyChange',
-          'sequence'
-        >).args;
-
-        for (const ata of trigAct.assetTriggerActions) {
-          if (!ata.sequence || ata.sequence === args.oldValue) {
-            ata.sequence = args.newValue;
-          }
-        }
-
-        this.debouncedReplan();
-      });
-
-    this.uow.entityManager
-      .onModelChanges(['generationAsset', 'triggerAction'], 'EntityState')
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe(chngArgs => {
-        if (
-          chngArgs.entity.entityAspect.entityState.isDetached() &&
-          chngArgs.entity.entityAspect.entityState.isDeleted()
-        ) {
-          this.deleteAtaByEntity(chngArgs.entity as
-            | TriggerAction
-            | GenerationAsset);
-        }
-
-        if (chngArgs.entity.entityAspect.entityState.isAdded()) {
-          this.addAtaByEntity(chngArgs.entity as
-            | TriggerAction
-            | GenerationAsset);
-        }
-      });
+    this.watchModelChanges();
   }
+
   ngOnDestroy(): void {
     this.unsubscribe.next();
     this.unsubscribe.complete();
@@ -144,21 +110,7 @@ export class GenPlannerComponent implements OnInit, OnDestroy {
     }
 
     this.setAtaPlanDates();
-
-    const taskData = this.uow.flattenGenerationTask(this.generation);
-
-    // const projectData = {
-    //   projectStartDate: taskData.projectStart,
-    //   projectEndDate: _m(taskData.projectEnd)
-    //     .add(12, 'h')
-    //     .toDate()
-    // };
-    this.schedTaskComponent.generationTasks = taskData.tasks;
-    // this.schedTaskComponent.ganttChart.updateDataSource(
-    //   taskData.tasks,
-    //   projectData
-    // );
-    this.schedTaskComponent.schedTaskCompCdRef.markForCheck();
+    this.schedTaskComponent.updateGanttData();
   }
 
   setAtaPlanDates(): void {
@@ -194,5 +146,54 @@ export class GenPlannerComponent implements OnInit, OnDestroy {
         }
       }
     }
+  }
+
+  updateTaskSchedGantt($event: any): void {
+    const schedTaskData = this.uow.flattenGenerationTask(this.generation);
+    // this.schedTaskComponent.schedGanttTasks = schedTaskData.tasks;
+    this.schedTaskComponent.schedTaskCompCdRef.markForCheck();
+  }
+
+  watchModelChanges(): void {
+    this.uow.entityManager
+      .onModelChanges('triggerAction', 'PropertyChange', 'sequence')
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(chngArgs => {
+        const trigAct = chngArgs.entity;
+        const args = (chngArgs as IEntityChangedEvent<
+          any,
+          'triggerAction',
+          'PropertyChange',
+          'sequence'
+        >).args;
+
+        for (const ata of trigAct.assetTriggerActions) {
+          if (!ata.sequence || ata.sequence === args.oldValue) {
+            ata.sequence = args.newValue;
+          }
+        }
+
+        this.debouncedReplan();
+      });
+
+    this.uow.entityManager
+      .onModelChanges(['generationAsset', 'triggerAction'], 'EntityState')
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(chngArgs => {
+        if (
+          chngArgs.entity.entityAspect.entityState.isDetached() &&
+          chngArgs.entity.entityAspect.entityState.isDeleted()
+        ) {
+          this.deleteAtaByEntity(chngArgs.entity as
+            | TriggerAction
+            | GenerationAsset);
+        }
+
+        if (chngArgs.entity.entityAspect.entityState.isAdded()) {
+          this.addAtaByEntity(chngArgs.entity as
+            | TriggerAction
+            | GenerationAsset);
+        }
+      });
   }
 }

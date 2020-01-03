@@ -5,14 +5,14 @@ import {
   HttpResponse,
   core,
   AjaxAdapter,
-  HttpResponse as BreezeHttpResponse
-} from 'breeze-client';
-import { DsaConfig } from './breeze-angular-bridge';
-import * as _l from 'lodash';
-import { dataBound } from '@syncfusion/ej2-grids';
-import { IODataBatchResponse, IODataPayload } from '@app_types';
-import { SpConfig } from 'app/core/config/app-config';
-import { CustomDataServiceUtils, IHttpResultsData } from './data-service-utils';
+  HttpResponse as BreezeHttpResponse,
+  AjaxConfig
+} from "breeze-client";
+import { DsaConfig } from "./breeze-angular-bridge";
+import * as _l from "lodash";
+import { IODataBatchResponse, IODataPayload } from "@app_types";
+import { SpConfig } from "app/core/config/app-config";
+import { CustomDataServiceUtils, IHttpResultsData } from "./data-service-utils";
 
 declare var OData: any;
 
@@ -34,9 +34,9 @@ export class SpQueryDataService {
   relativeUrl: boolean | ((ds: DataService, url: string) => string);
 
   headers = {
-    DataServiceVersion: '3.0',
-    Accept: 'application/json;odata=minimalmetadata',
-    'Content-Type': 'application/json;odata=verbose'
+    DataServiceVersion: "3.0",
+    Accept: "application/json;odata=minimalmetadata",
+    "Content-Type": "application/json;odata=verbose"
   };
 
   constructor(
@@ -67,7 +67,7 @@ export class SpQueryDataService {
         .replace(/.*\/\/[^\/]*/, SpConfig.cfgSharepointMainAppSite);
       return {
         requestUri: internalBatchUrl,
-        method: 'GET',
+        method: "GET",
         headers
       };
     });
@@ -77,12 +77,12 @@ export class SpQueryDataService {
       OData.request(
         {
           headers: {
-            MaxDataServiceVersion: '3.0',
-            DataServiceVersion: '3.0',
-            'X-RequestDigest': await ds.getRequestDigest()
+            MaxDataServiceVersion: "3.0",
+            DataServiceVersion: "3.0",
+            "X-RequestDigest": await ds.getRequestDigest()
           },
           requestUri: ds.odataAppEndpoint,
-          method: 'POST',
+          method: "POST",
           data: {
             __batchRequests: bRequests
           }
@@ -117,13 +117,15 @@ export class SpQueryDataService {
     const headers = this.headers;
 
     headers[
-      'X-RequestDigest'
+      "X-RequestDigest"
     ] = await mc.entityManager.dataService.getRequestDigest();
 
-    if (typeof query === 'string') {
-      const requestCfg: DsaConfig = {
-        type: 'GET',
+    if (typeof query === "string") {
+      const requestCfg: AjaxConfig = {
+        type: "GET",
         url: mc.getUrl(),
+        success: undefined,
+        error: undefined,
         headers
       };
 
@@ -147,7 +149,7 @@ export class SpQueryDataService {
         {
           headers,
           requestUri: mc.getUrl(),
-          method: 'GET'
+          method: "GET"
         },
         (data, httpResponse) => resolve({ data, httpResponse }),
         reject

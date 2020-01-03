@@ -5,25 +5,25 @@ import {
   EntityType,
   SaveResult,
   EntityManager
-} from 'breeze-client';
-import * as _l from 'lodash';
+} from "breeze-client";
+import * as _l from "lodash";
 import {
   IBzEntity,
   IBzCustomEntityType,
   RelatedEntityKind,
   RelatedEntityShortName,
   IAppFormGroup
-} from '@app_types';
-import { BzEntityProp } from '../decorators';
-import Swal, { SweetAlertOptions } from 'sweetalert2';
-import { stat } from 'fs';
+} from "@app_types";
+import { BzEntityProp } from "../decorators";
+import Swal, { SweetAlertOptions } from "sweetalert2";
+import { stat } from "fs";
 
 export abstract class BreezeEntity implements IBzEntity {
   abstract readonly shortname: string;
 
   isSoftDeleted?: boolean;
 
-  @BzEntityProp('data', {
+  @BzEntityProp("data", {
     dataCfg: {
       isPartOfKey: true,
       dataType: DataType.Int16
@@ -77,12 +77,12 @@ export abstract class BreezeEntity implements IBzEntity {
 
     if (withConfirmation) {
       const alertConfig: SweetAlertOptions = {
-        title: 'Cancel Changes?',
-        type: 'question',
+        title: "Cancel Changes?",
+        icon: "question",
         showCancelButton: true,
         showConfirmButton: true,
-        cancelButtonText: 'No, continue editing',
-        confirmButtonText: 'Yes, reject changes'
+        cancelButtonText: "No, continue editing",
+        confirmButtonText: "Yes, reject changes"
       };
       const result = await Swal.fire(alertConfig);
       if (result.dismiss === Swal.DismissReason.cancel) {
@@ -107,13 +107,13 @@ export abstract class BreezeEntity implements IBzEntity {
 
     if (withConfirmation) {
       const config: SweetAlertOptions = {
-        title: 'Confirm Deletion?',
+        title: "Confirm Deletion?",
         text: addMessage || `Are you sure? This action is permanent.`,
-        type: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
       };
 
       const result = await Swal.fire(config);
@@ -140,7 +140,7 @@ export abstract class BreezeEntity implements IBzEntity {
     const em = entityManager || this.entityAspect.entityManager;
 
     if (!em) {
-      throw new Error('Unable to save entity, Cannot locate related manager!');
+      throw new Error("Unable to save entity, Cannot locate related manager!");
     }
     if (this.entityAspect.entityState.isUnchanged()) {
       return;

@@ -5,6 +5,7 @@ import {
   BzEntityInitializer
 } from 'app/core';
 import * as _l from 'lodash';
+import * as _m from 'moment';
 import { Generation } from './generation';
 import { GenerationAsset } from './generation-asset';
 import { Team } from './team';
@@ -146,6 +147,54 @@ export class AssetTriggerAction extends SharepointEntity {
     }
   })
   generation: Generation;
+
+  /**
+   * The following properties are used
+   * to support transforming and optimizing the
+   * entity for displaying in Gantt Chart format.
+   */
+
+  get taskAsset(): string {
+    return this.generationAsset.asset.alias;
+  }
+
+  set taskAsset(id: string) {}
+
+  get taskTrigger(): string {
+    return this.triggerAction.trigger.milestone;
+  }
+
+  set taskTrigger(date: string) {}
+
+  get taskName(): string {
+    return this.triggerAction
+      ? this.triggerAction.actionItem.action
+      : undefined;
+  }
+
+  set taskName(name: string) {}
+
+  get taskDuration(): number {
+    return this.triggerAction ? this.triggerAction.actionItem.duration : 0;
+  }
+
+  set taskDuration(duration: number) {}
+
+  get taskEntityStatus(): string {
+    return this.entityAspect.entityState.name;
+  }
+
+  // set taskDuration(duration: number) {}
+
+  get taskFormattedDuration(): string {
+    if (!this.triggerAction) {
+      return;
+    }
+    return (_m.duration(
+      this.triggerAction.actionItem.duration,
+      'minutes'
+    ) as any).format('d [days], h [hours], m [minutes]');
+  }
 
   @BzEntityInitializer
   protected initializer(entity: this) {

@@ -19,6 +19,7 @@ import { PlanSchedTaskComponent } from './generation-planner/step-schedule-task/
 import { ActionItemManagerComponent } from './action-item-manager/action-item-manager.component';
 import { ActionItemResolverService } from './action-item-manager/action-item-manager-resolver.service';
 import { ActionItemDetailDialogComponent } from './action-item-manager';
+import { PlanTaskLineUpComponent } from './generation-planner/step-task-lineup/step-task-lineup.component';
 
 const routes: Routes = [
   {
@@ -60,7 +61,8 @@ export const routedComponents = [
   GenPlannerComponent,
   PlanGenAssetComponent,
   PlanTrigActionComponent,
-  PlanSchedTaskComponent
+  PlanSchedTaskComponent,
+  PlanTaskLineUpComponent
 ];
 
 @NgModule({

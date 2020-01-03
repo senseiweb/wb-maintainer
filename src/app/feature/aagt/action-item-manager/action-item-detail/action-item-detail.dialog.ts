@@ -7,53 +7,53 @@ import {
   ViewChild,
   ChangeDetectionStrategy,
   ChangeDetectorRef
-} from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { Subject, BehaviorSubject } from 'rxjs';
-import Swal, { SweetAlertOptions } from 'sweetalert2';
+} from "@angular/core";
+import { FormBuilder, FormControl, Validators } from "@angular/forms";
+import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
+import { Subject, BehaviorSubject } from "rxjs";
+import Swal, { SweetAlertOptions } from "sweetalert2";
 
-import { filter, takeUntil, debounceTime } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime } from "rxjs/operators";
 
-import { fuseAnimations } from '@fuse/animations';
-import { ActionItem, AagtUowService } from '../../aagt-core';
-import { IAppFormGroup } from '@app_types';
+import { fuseAnimations } from "@fuse/animations";
+import { ActionItem, AagtUowService } from "../../aagt-core";
+import { IAppFormGroup } from "@app_types";
 import {
   ToolbarService,
   LinkService,
   ImageService,
   HtmlEditorService,
   RichTextEditorComponent
-} from '@syncfusion/ej2-angular-richtexteditor';
-import { EntityManager } from 'breeze-client';
-import { SpChoiceResult } from 'app/core';
+} from "@syncfusion/ej2-angular-richtexteditor";
+import { EntityManager } from "breeze-client";
+import { SpChoiceResult } from "app/core";
 
-type CategoryFormMode = 'edit' | 'select' | 'add';
+type CategoryFormMode = "edit" | "select" | "add";
 type ActionItemModelProps =
   | keyof Pick<
       ActionItem,
-      | 'action'
-      | 'shortCode'
-      | 'duration'
-      | 'resourceCategory'
-      | 'assignable'
-      | 'notes'
+      | "action"
+      | "shortCode"
+      | "duration"
+      | "resourceCategory"
+      | "assignable"
+      | "notes"
     >
-  | 'addEditCategory';
+  | "addEditCategory";
 
 type ActionItemFormModel = { [key in ActionItemModelProps]: FormControl };
 
 @Component({
-  selector: 'app-asset-detail-dialog',
-  templateUrl: './action-item-detail.dialog.html',
-  styleUrls: ['./action-item-detail.dialog.scss'],
+  selector: "app-asset-detail-dialog",
+  templateUrl: "./action-item-detail.dialog.html",
+  styleUrls: ["./action-item-detail.dialog.scss"],
   providers: [ToolbarService, LinkService, HtmlEditorService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   animations: fuseAnimations
 })
 export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
-  @ViewChild('aiRteObj', { static: false })
+  @ViewChild("aiRteObj", { static: false })
   notesRte: RichTextEditorComponent;
   actionItem: ActionItem;
   actionItemFormGroup: IAppFormGroup<ActionItemFormModel>;
@@ -63,7 +63,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
   dialogTitle: string;
   duration: number;
   private em: EntityManager;
-  formMode: 'edit' | 'add';
+  formMode: "edit" | "add";
   makeAvail: string;
   newCategoryHint: string;
   formattedDuration: string;
@@ -83,13 +83,13 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   private formModelProps: Array<ActionItemModelProps> = [
-    'action',
-    'resourceCategory',
-    'assignable',
-    'duration',
-    'shortCode',
-    'notes',
-    'addEditCategory'
+    "action",
+    "resourceCategory",
+    "assignable",
+    "duration",
+    "shortCode",
+    "notes",
+    "addEditCategory"
   ];
   private unsubscribeAll: Subject<any>;
 
@@ -100,14 +100,14 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     this.isSaving = this.actionItem.entityAspect.entityManager.isSaving;
 
     if (this.actionItem.entityAspect.entityState.isAdded()) {
-      this.formMode = 'add';
-      this.dialogTitle = 'Add New Action Item';
+      this.formMode = "add";
+      this.dialogTitle = "Add New Action Item";
     } else {
-      this.formMode = 'edit';
+      this.formMode = "edit";
       this.dialogTitle = `Edit Action Item ${this.actionItem.shortCode}`;
     }
 
-    this.categoryFormMode = 'select';
+    this.categoryFormMode = "select";
     this.createFormGroupAndValidators();
   }
 
@@ -118,8 +118,8 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
 
   addCategory(): void {
     const fgControls = this.actionItemFormGroup.controls;
-    this.categoryFormMode = 'add';
-    fgControls.addEditCategory.reset('',  {emitEvent: false});
+    this.categoryFormMode = "add";
+    fgControls.addEditCategory.reset("", { emitEvent: false });
   }
 
   async cancelChanges(): Promise<void> {
@@ -131,11 +131,11 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
 
   cancelCategoryChanges(): void {
     const fgControls = this.actionItemFormGroup.controls;
-    this.categoryFormMode = 'select';
+    this.categoryFormMode = "select";
   }
 
   async confirmDelete(): Promise<void> {
-    await Swal.fire('Deleted!', 'Item has been deleted', 'success');
+    await Swal.fire("Deleted!", "Item has been deleted", "success");
   }
 
   createFormGroupAndValidators(): void {
@@ -144,8 +144,8 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     const formModel: Partial<ActionItemFormModel> = {};
 
     this.formModelProps.forEach(prop => {
-      const defaultProp = actionItem ? actionItem[prop] : '';
-      formModel[prop] = new FormControl(defaultProp, { updateOn: 'blur' });
+      const defaultProp = actionItem ? actionItem[prop] : "";
+      formModel[prop] = new FormControl(defaultProp, { updateOn: "blur" });
     });
 
     this.actionItemFormGroup = this.formBuilder.group(formModel) as any;
@@ -158,10 +158,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     const fgControls = this.actionItemFormGroup.controls;
 
     fgControls.addEditCategory.valueChanges
-      .pipe(
-        debounceTime(150),
-        takeUntil(this.unsubscribeAll)
-      )
+      .pipe(debounceTime(150), takeUntil(this.unsubscribeAll))
       .subscribe(value => {
         const frmControl = fgControls.addEditCategory;
         this.isExistingCategory = this.categories.some(
@@ -180,10 +177,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
       });
 
     fgControls.duration.valueChanges
-      .pipe(
-        debounceTime(150),
-        takeUntil(this.unsubscribeAll)
-      )
+      .pipe(debounceTime(150), takeUntil(this.unsubscribeAll))
       .subscribe(value => {
         this.duration = value;
       });
@@ -191,14 +185,14 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
 
   async deleteResourceCategory(): Promise<void> {
     const alertCfg: SweetAlertOptions = {
-      type: 'question',
-      title: 'Delete Category?',
+      icon: "question",
+      title: "Delete Category?",
       text:
-        'This will only affect future selections, previous uses of the category will be unaffected',
+        "This will only affect future selections, previous uses of the category will be unaffected",
       showCancelButton: true,
-      cancelButtonText: 'No, keep it',
+      cancelButtonText: "No, keep it",
       showConfirmButton: true,
-      confirmButtonText: 'Yes, delete it'
+      confirmButtonText: "Yes, delete it"
     };
 
     const confirmationResult = await Swal.fire(alertCfg);
@@ -221,8 +215,8 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     );
     if (confirmedDelete) {
       const config: SweetAlertOptions = {
-        type: 'success',
-        title: 'Deleted!',
+        icon: "success",
+        title: "Deleted!",
         timer: 2500
       };
       await Swal.fire(config);
@@ -231,10 +225,12 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   async editResourceCategory(): Promise<void> {
-    this.categoryFormMode = 'edit';
+    this.categoryFormMode = "edit";
     this.isExistingCategory = true;
     const fgControls = this.actionItemFormGroup.controls;
-    fgControls.addEditCategory.reset(fgControls.resourceCategory.value, {emitEvent: false});
+    fgControls.addEditCategory.reset(fgControls.resourceCategory.value, {
+      emitEvent: false
+    });
   }
 
   async saveCategoryEdits(): Promise<void> {
@@ -243,15 +239,15 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     const oldResourceCategoryName = fgControls.resourceCategory.value;
 
     let alertCfg: SweetAlertOptions = {
-      type: 'question',
+      icon: "question",
       title: `Edit Category:
       ${oldResourceCategoryName}?`,
       text: `This will globally update ALL Action Items that have the same resource category name.
        This may take awhile, are you sure?`,
       showCancelButton: true,
-      cancelButtonText: 'No, cancel changes',
+      cancelButtonText: "No, cancel changes",
       showConfirmButton: true,
-      confirmButtonText: 'Yes, change ALL'
+      confirmButtonText: "Yes, change ALL"
     };
 
     const confirmationResult = await Swal.fire(alertCfg);
@@ -269,11 +265,11 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
 
     const saveResult = await this.uow.saveUnitOfWork(allEntities);
 
-    this.categoryFormMode = 'select';
+    this.categoryFormMode = "select";
 
     alertCfg = {
-      type: 'info',
-      title: 'Update Complete',
+      icon: "info",
+      title: "Update Complete",
       text: `Outcome of changes:\n
       ${saveResult.entities.length} Items Suceeded \n
       ${saveResult.entitiesWithErrors.length} Items Failed:`
@@ -293,7 +289,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   async saveCategoryChanges(): Promise<void> {
-    if (this.categoryFormMode === 'edit') {
+    if (this.categoryFormMode === "edit") {
       return this.saveCategoryEdits();
     }
 
@@ -327,9 +323,9 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
       );
     } catch (e) {
       Swal.fire(
-        'Unsucessful',
-        'An error occurred trying to save your changes...please try again or contact support for assistance',
-        'error'
+        "Unsucessful",
+        "An error occurred trying to save your changes...please try again or contact support for assistance",
+        "error"
       );
       console.error(e);
     } finally {
@@ -339,19 +335,19 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     this.categories = [...pendingNewCategores];
 
     this.actionItemFormGroup.patchValue({
-      resourceCategory: isDeletionMode ? '' : categoryBeingChanged,
-      addEditCategory: ''
+      resourceCategory: isDeletionMode ? "" : categoryBeingChanged,
+      addEditCategory: ""
     });
 
-    this.categoryFormMode = 'select';
+    this.categoryFormMode = "select";
   }
 
   async saveChanges(del: string): Promise<void> {
-    if (this.categoryFormMode !== 'select') {
+    if (this.categoryFormMode !== "select") {
       await Swal.fire(
-        'Unsaved Category',
-        'Please save or cancel changes to the resource category before continuing',
-        'info'
+        "Unsaved Category",
+        "Please save or cancel changes to the resource category before continuing",
+        "info"
       );
       return;
     }
@@ -361,8 +357,8 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     try {
       await this.actionItem.save();
       const config: SweetAlertOptions = {
-        type: 'success',
-        title: 'Update Success',
+        icon: "success",
+        title: "Update Success",
         timer: 2500
       };
       await Swal.fire(config);

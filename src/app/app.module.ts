@@ -16,8 +16,8 @@ const initApp = (
 @NgModule({
   declarations: [AppComponent],
   imports: [
-    CoreModule,
     BrowserModule,
+    CoreModule,
     SharedModule,
     HomeModule,
     AppRoutingModule

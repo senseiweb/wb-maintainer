@@ -23,7 +23,9 @@
             <ng-template matStepLabel>
               <span>Plan Generation Tasks</span>
             </ng-template>
-            <app-plan-sched-task></app-plan-sched-task>
+            <app-plan-sched-task
+              (cascadeGanttUpdate)="updateTaskSchedGantt($event)"
+            ></app-plan-sched-task>
           </mat-step>
         </mat-horizontal-stepper>
       </div>

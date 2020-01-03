@@ -7,7 +7,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { HttpClientModule } from '@angular/common/http';
 import { defaultFuseConfig } from './config/fuse-config';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 import 'hammerjs';
 import 'breeze-client';
@@ -33,7 +32,6 @@ import { DataAccessModule } from './data-access/data-access.module';
     FuseProgressBarModule,
     FuseNavigationModule,
     FuseSidebarModule,
-    SweetAlert2Module.forRoot()
   ],
   exports: [
     BrowserModule,
