@@ -35,7 +35,7 @@
     "moment": "2.24.0",
     "moment-duration-format": "^2.3.2",
     "perfect-scrollbar": "1.4.0",
-    "prismjs": "1.17.1",
+    "prismjs": "1.27.0",
     "sweetalert2": "^9.4.3",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
